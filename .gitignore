@@ -1,0 +1,4 @@
+*.o
+src/version.cpp
+./rapidhls
+*.exe

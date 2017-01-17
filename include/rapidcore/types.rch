@@ -1,0 +1,15 @@
+typedef unsigned<1> bool;
+typedef unsigned<1> bit;
+typedef signed<8> char;
+typedef unsigned<8> byte;
+typedef signed<32> int;
+
+typedef unsigned<8> uint8_t;
+typedef signed<8> int8_t;
+typedef unsigned<16> uint16_t;
+typedef signed<16> int16_t;
+typedef unsigned<32> uint32_t;
+typedef signed<32> int32_t;
+
+const bool true = 1;
+const bool false = 0;
