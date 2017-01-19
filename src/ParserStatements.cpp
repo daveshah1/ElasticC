@@ -60,5 +60,11 @@ ReturnStatement::ReturnStatement(Expression *_retval) : returnValue(_retval){};
 
 TemplateParamToken::TemplateParamToken(Context *_context, int _index)
     : pcontext(_context), index(_index){};
+
+NullStatement_class NullStamement_obj;
+NullStatement_class *NullStatement = &NullStamement_obj;
+
+NullExpression_class NullExpression_obj;
+NullExpression_class *NullExpression = &NullExpression_obj;
 }
 }

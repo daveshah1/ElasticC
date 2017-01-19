@@ -131,6 +131,16 @@ public:
 
   Statement *body;
 };
+// Hardware block parameters - special I/Os, etc
+struct HardwareBlockParams {
+  bool has_clock = false;          // Has a clock input (recommeneded...)
+  unsigned long clock_freq = 50e6; // clock frequency
+  bool has_cken = false;           // Has a clock enable input
+  bool has_den = false;            // Has a data enable input
+  bool has_den_out = false;        // Has a data enable output
+  bool has_sync_rst = false;       // Has a sync reset input
+};
+
 // A top level design block
 class HardwareBlock : public Context {
 public:
@@ -140,6 +150,7 @@ public:
   vector<Variable *> outputs;
   vector<Variable *> GetDeclaredVariables();
   Statement *body;
+  HardwareBlockParams params;
 };
 // This is the global scope, representing an entire parsed source file
 class GlobalScope : public Context {

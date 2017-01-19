@@ -1,5 +1,6 @@
 #include "RCCParser.hpp"
 #include "DataTypes.hpp"
+#include "Evaluator.hpp"
 #include "TemplateParser.hpp"
 #include "Util.hpp"
 #include <algorithm>
@@ -216,6 +217,7 @@ void RCCParser::ParseFunction(const AttributeSet &currentAttr,
   func->arguments = ParseArgumentList(func, dummy1, dummy2);
   code.Skip();
   func->body = ParseStatement(func);
+  gs.functions.push_back(func);
 }
 
 AttributeSet RCCParser::ParseAttributes() {
@@ -779,6 +781,73 @@ Expression *RCCParser::ParseVarExpression(Context *ctx) {
 bool RCCParser::IsFunction(string token) {
   return any_of(gs.functions.begin(), gs.functions.end(),
                 [token](Function *f) { return f->name == token; });
+}
+
+void RCCParser::ParseHWBlock(const AttributeSet &currentAttr) {
+  HardwareBlock *hwBlock = new HardwareBlock();
+  hwBlock->parentContext = &gs;
+  hwBlock->attributes = currentAttr;
+  code.GetNextIdentOrLiteral(); // Consume block keyword
+  code.Skip();
+  string blockName = code.GetNextIdentOrLiteral();
+  if ((blockName.size() == 0) || (isdigit(blockName[0]))) {
+    throw parse_error("invalid hardware block name");
+  }
+  code.Skip();
+  hwBlock->name = blockName;
+  map<string, vector<Templates::TemplateParameter *>> specialInputs;
+  map<string, bool> specialInputsFound;
+  Templates::IntParameter clockFreq("frequency");
+  specialInputs["clock"] = {&clockFreq};
+  specialInputs["cken"] = {};
+  specialInputs["den"] = {};
+  specialInputs["reset"] = {};
+  vector<pair<Variable *, bool>> inputList =
+      ParseArgumentList(hwBlock, specialInputs, specialInputsFound);
+  transform(inputList.begin(), inputList.end(), back_inserter(hwBlock->inputs),
+            [](pair<Variable *, bool> x) -> Variable * {
+              if (x.second)
+                throw parse_error("reference type not allowed as block input "
+                                  "(consider using an output instead?)");
+              else
+                return x.first;
+            });
+  if (specialInputsFound["clock"])
+    hwBlock->params.has_clock = true;
+  SingleCycleEvaluator tempEval(&gs);
+  if (clockFreq.wasSpecified)
+    hwBlock->params.clock_freq = clockFreq.GetValue(&tempEval);
+  if (specialInputsFound["cken"])
+    hwBlock->params.has_cken = true;
+  if (specialInputsFound["den"])
+    hwBlock->params.has_den = true;
+  if (specialInputsFound["reset"])
+    hwBlock->params.has_sync_rst = true;
+
+  code.Skip();
+  if (code.GetNext(2) != "=>")
+    throw parse_error("missing => after block input list");
+  code.Skip();
+
+  map<string, vector<Templates::TemplateParameter *>> specialOutputs = {
+      {"den_out", {}}};
+  map<string, bool> specialOutputsFound;
+
+  vector<pair<Variable *, bool>> outputList =
+      ParseArgumentList(hwBlock, specialOutputs, specialOutputsFound);
+  transform(
+      outputList.begin(), outputList.end(), back_inserter(hwBlock->outputs),
+      [this](pair<Variable *, bool> x) -> Variable * {
+        if (x.second)
+          PrintMessage(MSG_WARNING, "ignoring reference type as block output",
+                       code.GetLine());
+        return x.first;
+      });
+  if (specialOutputsFound["den_out"])
+    hwBlock->params.has_den_out = true;
+
+  hwBlock->body = ParseStatement(hwBlock);
+  gs.blocks.push_back(hwBlock);
 }
 }
 }

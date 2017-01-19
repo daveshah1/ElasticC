@@ -59,6 +59,14 @@ vector<EvalObject *> EvalObject::GetOperands() {
   return vector<EvalObject *>{};
 };
 
+EvalObject *EvalObject::GetValue(Evaluator *state) { return EvalNull; }
+
+bool EvalObject::CanPushInto() { return false; }
+
+EvalObject *EvalObject::ApplyPushInto(Evaluator *state, EvalObject *value) {
+  return EvalNull;
+}
+
 /* EvalVariable */
 EvalVariable::EvalVariable(EvaluatorVariable *_var) : EvalObject(), var(_var){};
 
@@ -422,4 +430,7 @@ EvalObject *EvalBasicOperation::GetResult(Evaluator *state,
     }
   }
 }
+
+EvalNull_class EvalNull_obj;
+EvalNull_class *EvalNull = &EvalNull_obj;
 }
