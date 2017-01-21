@@ -171,6 +171,8 @@ TemplateParamContext::GetTypeParameter(Evaluator *eval,
   }
 }
 
+Evaluator::~Evaluator() {}
+
 SingleCycleEvaluator::SingleCycleEvaluator(Parser::GlobalScope *_gs)
     : Evaluator(_gs){};
 
@@ -392,4 +394,6 @@ SingleCycleEvaluator::FindFirstNotMatchingConds(EvalObject *&value, int index) {
   else
     return FindFirstNotMatchingConds(eso->GetOperands()[2], index + 2);
 }
+
+SingleCycleEvaluator::~SingleCycleEvaluator() {}
 }

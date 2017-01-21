@@ -256,6 +256,32 @@ vector<EvalObject *> EvalStruct::GetOperands() {
   return operands;
 }
 
+EvalCast::EvalCast(IntegerType *_castTo, EvalObject *_operand)
+    : EvalObject(), castTo(_castTo), operand(_operand){};
+
+string EvalCast::GetID() { return "cast_" + to_string(base_id); }
+
+DataType *EvalCast::GetDataType(Evaluator *state) { return castTo; };
+
+bool EvalCast::HasConstantValue(Evaluator *state) {
+  return operand->HasConstantValue(state);
+};
+
+EvalObject *EvalCast::GetConstantValue(Evaluator *state) {
+  return new EvalCast(castTo, operand->GetConstantValue(state));
+}
+
+BitConstant EvalCast::GetScalarConstValue(Evaluator *state) {
+  return operand->GetScalarConstValue(state).cast(castTo->width,
+                                                  castTo->is_signed);
+}
+
+vector<EvalObject *> EvalCast::GetOperands() { return {operand}; }
+
+EvalObject *EvalCast::GetValue(Evaluator *state) {
+  return new EvalCast(castTo, operand->GetValue(state));
+}
+
 EvalBasicOperation::EvalBasicOperation(OperationType _type,
                                        vector<EvalObject *> _operands)
     : EvalObject(), type(_type), operands(_operands){};
@@ -429,6 +455,46 @@ EvalObject *EvalBasicOperation::GetResult(Evaluator *state,
       return new EvalBasicOperation(type, operands);
     }
   }
+}
+
+EvalNull_class::EvalNull_class() : EvalObject(){};
+
+string EvalNull_class::GetID() { return "<null>"; };
+DataType *EvalNull_class::GetDataType(Evaluator *state) {
+  throw eval_error(nullMessage);
+}
+bool EvalNull_class::HasConstantValue(Evaluator *state) { return false; };
+EvalObject *EvalNull_class::GetConstantValue(Evaluator *state) {
+  throw eval_error(nullMessage);
+}
+EvalObject *
+EvalNull_class::ApplyArraySubscriptRead(Evaluator *state,
+                                        vector<EvalObject *> subscript) {
+  throw eval_error(nullMessage);
+}
+void EvalNull_class::ApplyArraySubscriptWrite(Evaluator *state,
+                                              vector<EvalObject *> subscript,
+                                              EvalObject *value) {
+  throw eval_error(nullMessage);
+}
+EvalObject *EvalNull_class::GetStructureMember(Evaluator *state, string name) {
+  throw eval_error(nullMessage);
+}
+void EvalNull_class::AssignStructureMember(Evaluator *state, string name,
+                                           EvalObject *value) {
+  throw eval_error(nullMessage);
+}
+EvalObject *EvalNull_class::ApplyToState(Evaluator *state) {
+  throw eval_error(nullMessage);
+}
+void EvalNull_class::AssignValue(Evaluator *state, EvalObject *value) {
+  throw eval_error(nullMessage);
+}
+vector<EvalObject *> EvalNull_class::GetOperands() {
+  throw eval_error(nullMessage);
+}
+EvalObject *EvalNull_class::GetValue(Evaluator *state) {
+  throw eval_error(nullMessage);
 }
 
 EvalNull_class EvalNull_obj;
