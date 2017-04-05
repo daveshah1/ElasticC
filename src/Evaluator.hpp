@@ -50,6 +50,8 @@ public:
       Parser::Function *func, vector<EvalObject *> arguments,
       vector<Parser::Templates::TemplateParameter *> templateParams);
 
+  virtual ~Evaluator();
+
 protected:
   vector<EvaluatorVariable *> allVariables;
   map<Parser::Variable *, EvaluatorVariable *> parserVariables;
@@ -98,6 +100,8 @@ public:
   virtual EvalObject *GetVariableValue(EvaluatorVariable *var);
   virtual void EvaluateStatement(Parser::Statement *stmt);
   virtual EvalObject *EvaluateExpression(Parser::Expression *expr);
+
+  virtual ~SingleCycleEvaluator();
 
 private:
   map<EvaluatorVariable *, EvalObject *> currentVariableValues;

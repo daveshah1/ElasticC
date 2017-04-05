@@ -198,6 +198,7 @@ public:
   DataType *GetDataType(Evaluator *state);
   bool HasConstantValue(Evaluator *state);
   EvalObject *GetConstantValue(Evaluator *state);
+  BitConstant GetScalarConstValue(Evaluator *state);
   vector<EvalObject *> GetOperands();
   EvalObject *GetValue(Evaluator *state);
 
@@ -337,6 +338,9 @@ public:
   void AssignValue(Evaluator *state, EvalObject *value);
   vector<EvalObject *> GetOperands();
   EvalObject *GetValue(Evaluator *state);
+
+  const string nullMessage =
+      "null in evaluation tree (probably an internal error, please report)";
 };
 
 extern EvalNull_class *EvalNull;
