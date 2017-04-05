@@ -1,10 +1,20 @@
 #include "DataTypes.hpp"
 #include <algorithm>
+#include <stdexcept>
 #include <string>
 #include <vector>
 using namespace std;
 
 namespace RapidHLS {
+
+DataType *DataType::GetBaseType() {
+  throw runtime_error(GetName() + " has no base type");
+}
+
+DataType *DataType::GetMemberType(string member) {
+  throw runtime_error(GetName() + " has no member named " + member);
+}
+
 IntegerType::IntegerType(int _width, bool _is_signed) {
   width = _width;
   is_signed = _is_signed;
@@ -55,6 +65,8 @@ bool ArrayType::Equals(DataType *other) {
   }
 }
 
+DataType *ArrayType::GetBaseType() { return baseType; };
+
 StreamType::StreamType(DataType *_baseType, bool _2d, int _length, int _height,
                        int _lineWidth)
     : baseType(_baseType), isStream2d(_2d), length(_length), height(_height),
@@ -97,6 +109,8 @@ bool StreamType::Equals(DataType *other) {
   }
 }
 
+DataType *StreamType::GetBaseType() { return baseType; };
+
 RAMType::RAMType(IntegerType _baseType, int _length)
     : baseType(_baseType), length(_length) {}
 
@@ -121,6 +135,8 @@ bool RAMType::Equals(DataType *other) {
             (rt->is_rom == is_rom));
   }
 }
+
+DataType *RAMType::GetBaseType() { return &baseType; };
 
 bool operator==(const DataStructureItem &a, const DataStructureItem &b) {
   return (a.name == b.name) && (a.type->Equals(b.type));
@@ -155,4 +171,16 @@ bool StructureType::Equals(DataType *other) {
     return st->content == content;
   }
 };
+
+DataType *StructureType::GetMemberType(string member) {
+  auto m = find_if(
+      content.begin(), content.end(),
+      [member](const DataStructureItem &itm) { return itm.name == member; });
+  if (m == content.end()) {
+    throw runtime_error("structure " + structName +
+                        " contains no member named " + member);
+  } else {
+    return m->type;
+  }
+}
 }

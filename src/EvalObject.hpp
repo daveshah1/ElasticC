@@ -159,6 +159,7 @@ public:
   void AssignValue(Evaluator *state, EvalObject *value);
   vector<EvalObject *> GetOperands();
   EvalObject *GetValue(Evaluator *state);
+  EvalObject *GetReference(Evaluator *state);
 
 private:
   EvalObject *base;
@@ -187,6 +188,7 @@ public:
   EvalObject *GetValue(Evaluator *state);
 
 private:
+  EvalObject *base;
   string member;
 };
 

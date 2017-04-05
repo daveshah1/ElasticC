@@ -17,6 +17,9 @@ public:
   virtual vector<int> GetDimensions() = 0;
 
   virtual bool Equals(DataType *other) = 0;
+
+  virtual DataType *GetBaseType();
+  virtual DataType *GetMemberType(string member);
 };
 
 /*
@@ -50,6 +53,7 @@ public:
   int GetWidth();
   bool Equals(DataType *other);
   vector<int> GetDimensions();
+  DataType *GetBaseType();
 };
 /*
 A stream or stream2d
@@ -69,6 +73,7 @@ public:
   int GetWidth();
   bool Equals(DataType *other);
   vector<int> GetDimensions();
+  DataType *GetBaseType();
 };
 
 // An entry in a datastructure
@@ -95,6 +100,7 @@ public:
   int GetWidth();
   bool Equals(DataType *other);
   vector<int> GetDimensions();
+  DataType *GetMemberType(string member);
 };
 
 /*
@@ -111,6 +117,7 @@ public:
   bool Equals(DataType *other);
   vector<int> GetDimensions();
 
+  DataType *GetBaseType();
   bool is_rom = false;
 };
 

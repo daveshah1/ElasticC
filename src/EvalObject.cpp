@@ -359,6 +359,8 @@ EvalObject *EvalBasicOperation::ApplyToState(Evaluator *state) {
     } else if (type == B_ASSIGN) {
       // simple assignment
       apOperands[0]->AssignValue(state, value);
+    } else {
+      throw eval_error("invalid operand");
     }
     return value;
   } else {
@@ -455,6 +457,131 @@ EvalObject *EvalBasicOperation::GetResult(Evaluator *state,
       return new EvalBasicOperation(type, operands);
     }
   }
+}
+
+EvalArrayAccess::EvalArrayAccess(EvalObject *_base, vector<EvalObject *> _index)
+    : EvalObject(), base(_base), index(_index){};
+
+string EvalArrayAccess::GetID() { return "array_access_" + to_string(base_id); }
+
+DataType *EvalArrayAccess::GetDataType(Evaluator *state) {
+  return base->GetDataType(state)->GetBaseType();
+}
+
+bool EvalArrayAccess::HasConstantValue(Evaluator *state) {
+  return base->HasConstantValue(state) &&
+         all_of(index.begin(), index.end(),
+                [state](EvalObject *i) { return i->HasConstantValue(state); });
+}
+
+EvalObject *EvalArrayAccess::GetConstantValue(Evaluator *state) {
+  vector<EvalObject *> constIndex;
+  transform(index.begin(), index.end(), back_inserter(constIndex),
+            [state](EvalObject *i) { return i->GetConstantValue(state); });
+  return base->GetConstantValue(state)->ApplyArraySubscriptRead(state,
+                                                                constIndex);
+}
+
+EvalObject *
+EvalArrayAccess::ApplyArraySubscriptRead(Evaluator *state,
+                                         vector<EvalObject *> subscript) {
+  return base->ApplyArraySubscriptRead(state, index)
+      ->ApplyArraySubscriptRead(state, subscript);
+}
+
+void EvalArrayAccess::ApplyArraySubscriptWrite(Evaluator *state,
+                                               vector<EvalObject *> subscript,
+                                               EvalObject *value) {
+  base->ApplyArraySubscriptRead(state, index)
+      ->ApplyArraySubscriptWrite(state, subscript, value);
+}
+
+EvalObject *EvalArrayAccess::GetStructureMember(Evaluator *state, string name) {
+  return base->ApplyArraySubscriptRead(state, index)
+      ->GetStructureMember(state, name);
+}
+void EvalArrayAccess::AssignStructureMember(Evaluator *state, string name,
+                                            EvalObject *value) {
+  base->ApplyArraySubscriptRead(state, index)
+      ->AssignStructureMember(state, name, value);
+}
+
+EvalObject *EvalArrayAccess::ApplyToState(Evaluator *state) {
+  for_each(index.begin(), index.end(),
+           [state](EvalObject *i) { i->ApplyToState(state); });
+  base->ApplyToState(state);
+  return GetValue(state);
+}
+
+void EvalArrayAccess::AssignValue(Evaluator *state, EvalObject *value) {
+  base->ApplyArraySubscriptWrite(state, index, value);
+}
+
+vector<EvalObject *> EvalArrayAccess::GetOperands() {
+  vector<EvalObject *> operands;
+  operands.push_back(base);
+  copy(index.begin(), index.end(), back_inserter(operands));
+  return operands;
+}
+
+EvalObject *EvalArrayAccess::GetValue(Evaluator *state) {
+  vector<EvalObject *> transformedIndex;
+  transform(index.begin(), index.end(), back_inserter(transformedIndex),
+            [state](EvalObject *i) { return i->GetValue(state); });
+  return base->ApplyArraySubscriptRead(state, transformedIndex)
+      ->GetValue(state);
+}
+
+EvalStructAccess::EvalStructAccess(EvalObject *_base, string _member)
+    : EvalObject(), base(_base), member(_member){};
+
+DataType *EvalStructAccess::GetDataType(Evaluator *state) {
+  return base->GetDataType(state)->GetMemberType(member);
+}
+
+bool EvalStructAccess::HasConstantValue(Evaluator *state) {
+  return base->HasConstantValue(state);
+}
+
+EvalObject *EvalStructAccess::GetConstantValue(Evaluator *state) {
+  return base->GetStructureMember(state, member)->GetConstantValue(state);
+}
+
+EvalObject *
+EvalStructAccess::ApplyArraySubscriptRead(Evaluator *state,
+                                          vector<EvalObject *> subscript) {
+  return base->GetStructureMember(state, member)
+      ->ApplyArraySubscriptRead(state, subscript);
+}
+void EvalStructAccess::ApplyArraySubscriptWrite(Evaluator *state,
+                                                vector<EvalObject *> subscript,
+                                                EvalObject *value) {
+  base->GetStructureMember(state, member)
+      ->ApplyArraySubscriptWrite(state, subscript, value);
+};
+EvalObject *EvalStructAccess::GetStructureMember(Evaluator *state,
+                                                 string name) {
+  return base->GetStructureMember(state, member)
+      ->GetStructureMember(state, name);
+}
+void EvalStructAccess::AssignStructureMember(Evaluator *state, string name,
+                                             EvalObject *value) {
+  base->GetStructureMember(state, member)
+      ->AssignStructureMember(state, name, value);
+}
+
+EvalObject *EvalStructAccess::ApplyToState(Evaluator *state) {
+  return base->ApplyToState(state)->GetStructureMember(state, member);
+}
+
+void EvalStructAccess::AssignValue(Evaluator *state, EvalObject *value) {
+  return base->AssignStructureMember(state, member, value);
+}
+
+vector<EvalObject *> EvalStructAccess::GetOperands() { return {base}; }
+
+EvalObject *EvalStructAccess::GetValue(Evaluator *state) {
+  return base->GetStructureMember(state, member)->GetValue(state);
 }
 
 EvalNull_class::EvalNull_class() : EvalObject(){};
