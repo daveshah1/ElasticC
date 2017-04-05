@@ -1,4 +1,4 @@
-src = $(wildcard src/*.cpp) $(wildcard src/hdl/*.cpp) src/version.cpp
+src = $(wildcard src/*.cpp) $(wildcard src/hdl/*.cpp) $(wildcard src/timing/*.cpp) src/version.cpp
 obj = $(src:.cpp=.o)
 
 CXXFLAGS = -std=c++14 -g -O3 -Isrc/
