@@ -1,3 +1,4 @@
+#pragma once
 #include "HDLPortType.hpp"
 #include <string>
 #include <vector>

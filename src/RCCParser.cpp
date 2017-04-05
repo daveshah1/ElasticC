@@ -588,10 +588,9 @@ Expression *RCCParser::ParseExpression(vector<char> terminators, Context *ctx) {
   bool isDone = false;
   // To support certain operation types keep track of whether the last parsed
   // token was an operation
-  bool lastWasOperation = true;
+  bool lastWasOperation = false;
   code.Skip();
   while (!isDone) {
-    lastWasOperation = false;
     bool nextIsLiteral = false;
     if (isdigit(code.PeekNext())) {
       nextIsLiteral = true;
@@ -606,8 +605,10 @@ Expression *RCCParser::ParseExpression(vector<char> terminators, Context *ctx) {
       }
       literal += code.GetNextIdentOrLiteral();
       parseStack.push(new Literal(BitConstant(literal)));
+      lastWasOperation = false;
     } else if (code.CheckMatchAndGet('(')) {
       opStack.push(OperationStackItem(OpStackItemType::L_PAREN));
+      lastWasOperation = true;
     } else if (code.PeekNext() == ')') {
       while ((!opStack.empty()) &&
              (opStack.top().type == OpStackItemType::L_PAREN)) {
@@ -629,6 +630,7 @@ Expression *RCCParser::ParseExpression(vector<char> terminators, Context *ctx) {
       // (if it is a terminator we need to keep it as other code might need to
       // see what the terminator was if more than one was specified)
       code.GetNext();
+      lastWasOperation = false;
     } else if (code.PeekNextIdentOrLiteral().size() > 0) {
       string nextIdent = code.PeekNextIdentOrLiteral();
       // assume identifier as didn't look like literal earlier
@@ -670,6 +672,7 @@ Expression *RCCParser::ParseExpression(vector<char> terminators, Context *ctx) {
         // assume it's a variable or variable-type construct
         parseStack.push(ParseVarExpression(ctx));
       }
+      lastWasOperation = false;
     } else if (find(terminators.begin(), terminators.end(), code.PeekNext()) !=
                terminators.end()) {
       isDone = true;
@@ -679,6 +682,7 @@ Expression *RCCParser::ParseExpression(vector<char> terminators, Context *ctx) {
       if (!code.CheckMatchAndGet('}'))
         throw parse_error("invalid initialsier list");
       parseStack.push(new InitialiserList(items));
+      lastWasOperation = false;
     } else {
       bool isOperation = false;
       OperationType operType;
@@ -690,15 +694,20 @@ Expression *RCCParser::ParseExpression(vector<char> terminators, Context *ctx) {
           isOperation = true;
           operType = unaryPrefixOperTypes[index];
         }
+        lastWasOperation = true;
       } else {
         int index = code.FindToken(binaryAndPostfixOperTokens, true, false);
         if (index != -1) {
           isOperation = true;
           operType = binaryAndPostfixOperTypes[index];
+          if (LookupOperation(operType)->num_params == 1) {
+            lastWasOperation = false;
+          } else {
+            lastWasOperation = true;
+          }
         }
       }
       if (isOperation) {
-        lastWasOperation = true;
         // process operation
         const Operation *oper = LookupOperation(operType);
         while ((!opStack.empty()) &&

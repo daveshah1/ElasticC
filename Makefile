@@ -1,7 +1,7 @@
-src = $(wildcard src/*.cpp) src/version.cpp
+src = $(wildcard src/*.cpp) $(wildcard src/hdl/*.cpp) src/version.cpp
 obj = $(src:.cpp=.o)
 
-CXXFLAGS = -std=c++14 -g -O3 
+CXXFLAGS = -std=c++14 -g -O3 -Isrc/
 LDFLAGS =  -lboost_system -lboost_filesystem
 all: rapidhls
 

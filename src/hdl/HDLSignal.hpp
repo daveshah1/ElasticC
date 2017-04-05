@@ -1,3 +1,4 @@
+#pragma once
 #include "HDLDevice.hpp"
 #include "HDLDevicePort.hpp"
 #include "HDLPortType.hpp"
