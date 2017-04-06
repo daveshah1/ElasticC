@@ -278,13 +278,6 @@ public:
   DataType *GetDataType(Evaluator *state);
   bool HasConstantValue(Evaluator *state);
   EvalObject *GetConstantValue(Evaluator *state);
-  EvalObject *ApplyArraySubscriptRead(Evaluator *state,
-                                      vector<EvalObject *> subscript);
-  void ApplyArraySubscriptWrite(Evaluator *state,
-                                vector<EvalObject *> subscript,
-                                EvalObject *value);
-  EvalObject *GetStructureMember(Evaluator *state, string name);
-  void AssignStructureMember(Evaluator *state, string name, EvalObject *value);
   EvalObject *ApplyToState(Evaluator *state);
   void AssignValue(Evaluator *state, EvalObject *value);
   vector<EvalObject *> GetOperands();

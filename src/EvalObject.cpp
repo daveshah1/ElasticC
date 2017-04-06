@@ -633,6 +633,31 @@ EvalObject *EvalStructAccess::GetValue(Evaluator *state) {
   return base->GetStructureMember(state, member)->GetValue(state);
 }
 
+EvalRegister::EvalRegister(EvalObject *_input) : EvalObject(), input(_input){};
+
+string EvalRegister::GetID() { return "reg_" + to_string(base_id); }
+
+DataType *EvalRegister::GetDataType(Evaluator *state) {
+  return input->GetDataType(state);
+}
+
+bool EvalRegister::HasConstantValue(Evaluator *state) {
+  return input->HasConstantValue(state);
+}
+
+EvalObject *EvalRegister::GetConstantValue(Evaluator *state) {
+  return input->GetConstantValue(state);
+}
+
+EvalObject *EvalRegister::ApplyToState(Evaluator *state) {
+  return new EvalRegister(input->ApplyToState(state));
+}
+vector<EvalObject *> EvalRegister::GetOperands() { return {input}; }
+
+EvalObject *EvalRegister::GetValue(Evaluator *state) {
+  return new EvalRegister(input->GetValue(state));
+}
+
 EvalNull_class::EvalNull_class() : EvalObject(){};
 
 string EvalNull_class::GetID() { return "<null>"; };

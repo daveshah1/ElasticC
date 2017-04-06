@@ -8,6 +8,8 @@ namespace RapidHLS {
 namespace Parser {
 namespace Templates {
 
+TemplateParameter::TemplateParameter(string _name) : name(_name){};
+
 BitConstantParameter::BitConstantParameter(string _name)
     : TemplateParameter(_name) {
   type = new AutoTypeSpecifier();

@@ -254,6 +254,23 @@ void StructureEvaluatorVariable::SetBitOffset(int _bitoffset) {
   EvaluatorVariable::SetBitOffset(_bitoffset);
 }
 
+EvalObject *StructureEvaluatorVariable::HandleRead(Evaluator *genst) {
+  map<string, EvalObject *> structValues;
+  transform(structItems.begin(), structItems.end(),
+            inserter(structValues, structValues.end()),
+            [genst](EvaluatorVariable *itm) {
+              return make_pair(itm->name, itm->HandleRead(genst));
+            });
+  return new EvalStruct(type, structValues);
+}
+
+void StructureEvaluatorVariable::HandleWrite(Evaluator *genst,
+                                             EvalObject *value) {
+  for (auto itm : structItems) {
+    itm->HandleWrite(genst, value->GetStructureMember(genst, itm->name));
+  }
+}
+
 ExternalMemoryEvaluatorVariable::ExternalMemoryEvaluatorVariable(
     VariableDir _dir, string _name, RAMType *_type)
     : EvaluatorVariable(_dir, _name), type(_type) {
@@ -339,6 +356,14 @@ void ExternalMemoryEvaluatorVariable::HandleSubscriptedWrite(
   genst->SetVariableValue(ports.at("__data"), value);
 }
 
+EvalObject *ExternalMemoryEvaluatorVariable::HandleRead(Evaluator *genst) {
+  throw eval_error("ROM device ===" + name + "=== must always be addressed");
+}
+void ExternalMemoryEvaluatorVariable::HandleWrite(Evaluator *genst,
+                                                  EvalObject *value) {
+  throw eval_error("ROM device ===" + name + "=== must always be addressed");
+}
+
 StreamEvaluatorVariable::StreamEvaluatorVariable(VariableDir _dir, string _name,
                                                  StreamType *_type)
     : EvaluatorVariable(_dir, _name), type(_type) {
@@ -380,5 +405,10 @@ vector<EvaluatorVariable *> StreamEvaluatorVariable::GetArrayChildren() {
 void StreamEvaluatorVariable::HandlePush(Evaluator *genst, EvalObject *value) {
   genst->SetVariableValue(write_enable, new EvalConstant(BitConstant(1)));
   genst->SetVariableValue(written_value, value);
+}
+
+void StreamEvaluatorVariable::HandleWrite(Evaluator *genst, EvalObject *value) {
+  throw eval_error("cannot assign to stream ===" + name +
+                   "===, use operator<< instead");
 }
 }

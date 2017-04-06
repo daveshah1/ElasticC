@@ -204,7 +204,6 @@ public:
   vector<EvaluatorVariable *> GetArrayChildren();
   void HandlePush(Evaluator *genst, EvalObject *value);
 
-  EvalObject *HandleRead(Evaluator *genst);
   void HandleWrite(Evaluator *genst, EvalObject *value);
 
 private:
