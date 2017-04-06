@@ -96,7 +96,7 @@ EvalObject *EvalVariable::GetConstantValue(Evaluator *state) {
     throw eval_error("input (top-level or internal) variable ===" + var->name +
                      "=== cannot be used as a constant");
   } else {
-    return state->GetVariableValue(var)->GetConstantValue(state);
+    return var->HandleRead(state)->GetConstantValue(state);
   }
 };
 
@@ -190,7 +190,7 @@ void EvalVariable::AssignValue(Evaluator *state, EvalObject *value) {
   var->HandleWrite(state, value);
 }
 EvalObject *EvalVariable::GetValue(Evaluator *state) {
-  return state->GetVariableValue(var);
+  return var->HandleRead(state);
 }
 
 /*EvalConstant*/
@@ -208,7 +208,56 @@ DataType *EvalConstant::GetDataType(Evaluator *state) {
 
 BitConstant EvalConstant::GetScalarConstValue(Evaluator *state) { return val; };
 
-// TODO: EvalArray
+EvalArray::EvalArray(ArrayType *_arrType, const vector<EvalObject *> &_items)
+    : EvalObject(), arrType(_arrType), items(_items){};
+
+string EvalArray::GetID() { return "temp_array_" + to_string(base_id); };
+
+bool EvalArray::HasConstantValue(Evaluator *state) {
+  return all_of(items.begin(), items.end(), [state](EvalObject *itm) {
+    return itm->HasConstantValue(state);
+  });
+}
+
+DataType *EvalArray::GetDataType(Evaluator *state) { return arrType; }
+
+EvalObject *EvalArray::GetConstantValue(Evaluator *state) {
+  vector<EvalObject *> constItems;
+  transform(items.begin(), items.end(), back_inserter(constItems),
+            [state](EvalObject *itm) { return itm->GetConstantValue(state); });
+  return new EvalArray(arrType, constItems);
+}
+
+EvalObject *EvalArray::ApplyArraySubscriptRead(Evaluator *state,
+                                               vector<EvalObject *> subscript) {
+  int offset = 0;
+  for (int i = 0; i < subscript.size(); i++) {
+    if (i > 0)
+      offset *= arrType->GetDimensions().at(i - 1);
+    offset += subscript[i]
+                  ->GetConstantValue(state)
+                  ->GetScalarConstValue(state)
+                  .intval();
+  }
+  return items.at(offset);
+}
+
+void EvalArray::ApplyArraySubscriptWrite(Evaluator *state,
+                                         vector<EvalObject *> subscript,
+                                         EvalObject *value) {
+  int offset = 0;
+  for (int i = 0; i < subscript.size(); i++) {
+    if (i > 0)
+      offset *= arrType->GetDimensions().at(i - 1);
+    offset += subscript[i]
+                  ->GetConstantValue(state)
+                  ->GetScalarConstValue(state)
+                  .intval();
+  }
+  items.at(offset) = value;
+}
+
+vector<EvalObject *> EvalArray::GetOperands() { return items; }
 
 /*EvalStruct*/
 EvalStruct::EvalStruct(StructureType *_structType,

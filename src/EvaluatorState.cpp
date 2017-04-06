@@ -62,6 +62,10 @@ BitConstant EvaluatorVariable::GetDefaultValue() {
   throw eval_error("variable ===" + name + "=== does not have default value");
 }
 
+EvalObject *EvaluatorVariable::HandleRead(Evaluator *genst) {
+  return genst->GetVariableValue(this);
+}
+
 void EvaluatorVariable::HandleWrite(Evaluator *genst, EvalObject *value) {
   genst->SetVariableValue(this, value);
 }
@@ -189,6 +193,22 @@ void ArrayEvaluatorVariable::SetBitOffset(int _bitoffset) {
     offset += type->baseType->GetWidth();
   });
   EvaluatorVariable::SetBitOffset(_bitoffset);
+}
+
+EvalObject *ArrayEvaluatorVariable::HandleRead(Evaluator *genst) {
+  vector<EvalObject *> childValues;
+  transform(
+      arrayItems.begin(), arrayItems.end(), back_inserter(childValues),
+      [genst](EvaluatorVariable *child) { return child->HandleRead(genst); });
+  return new EvalArray(type, childValues);
+}
+
+void ArrayEvaluatorVariable::HandleWrite(Evaluator *genst, EvalObject *value) {
+  // TODO: multidimensional
+  for (int i = 0; i < arrayItems.size(); i++) {
+    arrayItems[i]->HandleWrite(
+        genst, value->ApplyArraySubscriptRead(genst, {new EvalConstant(i)}));
+  }
 }
 
 StructureEvaluatorVariable::StructureEvaluatorVariable(VariableDir _dir,

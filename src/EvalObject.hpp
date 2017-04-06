@@ -105,7 +105,7 @@ private:
 // Represents an array of arbitrary values (could be constants or expressions)
 class EvalArray : public EvalObject {
 public:
-  EvalArray(const vector<EvalObject *> _items);
+  EvalArray(ArrayType *_arrType, const vector<EvalObject *> &_items);
   string GetID();
   bool HasConstantValue(Evaluator *state);
   DataType *GetDataType(Evaluator *state);
@@ -118,6 +118,7 @@ public:
   vector<EvalObject *> GetOperands();
 
 private:
+  ArrayType *arrType;
   vector<EvalObject *> items;
 };
 

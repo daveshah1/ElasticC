@@ -76,7 +76,7 @@ public:
   virtual BitConstant GetDefaultValue();
 
   // All these should be overriden if non-trivial behaviour is required
-
+  virtual EvalObject *HandleRead(Evaluator *genst);
   // Handle a write - overriden for static variables
   virtual void HandleWrite(Evaluator *genst, EvalObject *value);
   // Return true if array subscripting is non-trivial
@@ -141,6 +141,9 @@ public:
   vector<EvaluatorVariable *> GetArrayChildren();
   void SetBitOffset(int _bitoffset);
 
+  EvalObject *HandleRead(Evaluator *genst);
+  void HandleWrite(Evaluator *genst, EvalObject *value);
+
 private:
   ArrayType *type;
   vector<EvaluatorVariable *> arrayItems;
@@ -156,6 +159,9 @@ public:
   vector<EvaluatorVariable *> GetAllChildren();
   EvaluatorVariable *GetChildByName(string name);
   void SetBitOffset(int _bitoffset);
+
+  EvalObject *HandleRead(Evaluator *genst);
+  void HandleWrite(Evaluator *genst, EvalObject *value);
 
 private:
   StructureType *type;
@@ -179,6 +185,9 @@ public:
   void HandleSubscriptedWrite(Evaluator *genst, vector<EvalObject *> index,
                               EvalObject *value);
 
+  EvalObject *HandleRead(Evaluator *genst);
+  void HandleWrite(Evaluator *genst, EvalObject *value);
+
 private:
   RAMType *type;
   map<string, ScalarEvaluatorVariable *> ports;
@@ -194,6 +203,9 @@ public:
   EvaluatorVariable *GetChildByName(string name);
   vector<EvaluatorVariable *> GetArrayChildren();
   void HandlePush(Evaluator *genst, EvalObject *value);
+
+  EvalObject *HandleRead(Evaluator *genst);
+  void HandleWrite(Evaluator *genst, EvalObject *value);
 
 private:
   StreamType *type;
