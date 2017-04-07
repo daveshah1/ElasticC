@@ -15,6 +15,10 @@ DataType *DataType::GetMemberType(string member) {
   throw runtime_error(GetName() + " has no member named " + member);
 }
 
+HDLGen::HDLPortType *DataType::GetHDLType() {
+  return new HDLGen::LogicVectorPortType(GetWidth());
+}
+
 IntegerType::IntegerType(int _width, bool _is_signed) {
   width = _width;
   is_signed = _is_signed;
@@ -43,6 +47,10 @@ bool IntegerType::Equals(DataType *other) {
   }
 }
 
+HDLGen::HDLPortType *IntegerType::GetHDLType() {
+  return new HDLGen::NumericPortType(width, is_signed);
+}
+
 ArrayType::ArrayType(DataType *_baseType, int _length) {
   baseType = _baseType;
   length = _length;
@@ -66,6 +74,10 @@ bool ArrayType::Equals(DataType *other) {
 }
 
 DataType *ArrayType::GetBaseType() { return baseType; };
+
+HDLGen::HDLPortType *ArrayType::GetHDLType() {
+  return new HDLGen::LogicVectorPortType(GetWidth());
+}
 
 StreamType::StreamType(DataType *_baseType, bool _2d, int _length, int _height,
                        int _lineWidth)
@@ -111,6 +123,10 @@ bool StreamType::Equals(DataType *other) {
 
 DataType *StreamType::GetBaseType() { return baseType; };
 
+HDLGen::HDLPortType *StreamType::GetHDLType() {
+  throw runtime_error("stream type has no HDL equivalent");
+}
+
 RAMType::RAMType(IntegerType _baseType, int _length)
     : baseType(_baseType), length(_length) {}
 
@@ -137,6 +153,10 @@ bool RAMType::Equals(DataType *other) {
 }
 
 DataType *RAMType::GetBaseType() { return &baseType; };
+
+HDLGen::HDLPortType *RAMType::GetHDLType() {
+  throw runtime_error("RAM type has no HDL equivalent");
+}
 
 bool operator==(const DataStructureItem &a, const DataStructureItem &b) {
   return (a.name == b.name) && (a.type->Equals(b.type));
@@ -182,5 +202,9 @@ DataType *StructureType::GetMemberType(string member) {
   } else {
     return m->type;
   }
+}
+
+HDLGen::HDLPortType *StructureType::GetHDLType() {
+  return new HDLGen::LogicVectorPortType(GetWidth());
 }
 }

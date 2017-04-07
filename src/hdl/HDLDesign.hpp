@@ -15,11 +15,11 @@ public:
 
   string name;
   vector<HDLSignal *> signals;
-  vector<HDLPort *> ports;
+  vector<HDLDevicePort *> ports;
   vector<HDLDevice *> devices;
 
   void AddSignal(HDLSignal *sig);
-  HDLSignal *CreateTempSignal(HDLPortType *type, string prefix = "");
+  HDLSignal *CreateTempSignal(HDLPortType *type, string prefix = "temp");
   void AddDevice(HDLDevice *dev);
 
   void GenerateVHDLFile(ostream &out);
