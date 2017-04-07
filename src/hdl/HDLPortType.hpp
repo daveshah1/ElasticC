@@ -7,26 +7,30 @@ namespace HDLGen {
 
 class HDLPortType {
 public:
-  virtual string GetVHDLType() = 0;
-  virtual string GetVerilogType() = 0;
-  virtual int GetWidth() = 0;
+  virtual string GetVHDLType() const = 0;
+  virtual int GetWidth() const = 0;
+
+  virtual string VHDLCastFrom(const HDLPortType *other,
+                              const string &value) const;
 };
 
 class LogicSignalPortType : public HDLPortType {
 public:
-  virtual string GetVHDLType();
-  virtual string GetVerilogType();
-  virtual int GetWidth();
+  virtual string GetVHDLType() const;
+  virtual int GetWidth() const;
+  virtual string VHDLCastFrom(const HDLPortType *other,
+                              const string &value) const;
 };
 
-class ClockSignalPortType : public HDLPortType {};
+class ClockSignalPortType : public LogicSignalPortType {};
 
 class LogicVectorPortType : public HDLPortType {
 public:
   LogicVectorPortType(int _width);
-  virtual string GetVHDLType();
-  virtual string GetVerilogType();
-  virtual int GetWidth();
+  virtual string GetVHDLType() const;
+  virtual int GetWidth() const;
+  virtual string VHDLCastFrom(const HDLPortType *other,
+                              const string &value) const;
 
 private:
   int width;
@@ -35,9 +39,10 @@ private:
 class NumericPortType : public HDLPortType {
 public:
   NumericPortType(int _width, bool _signed);
-  virtual string GetVHDLType();
-  virtual string GetVerilogType();
-  virtual int GetWidth();
+  virtual string GetVHDLType() const;
+  virtual int GetWidth() const;
+  virtual string VHDLCastFrom(const HDLPortType *other,
+                              const string &value) const;
 
 private:
   int width;

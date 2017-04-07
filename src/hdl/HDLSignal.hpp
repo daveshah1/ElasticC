@@ -13,7 +13,6 @@ struct ClockInfo {
 public:
   double frequency = 50e6; // frequency in Hz
   double phase = 0;        // phase in degrees
-  double duty = 0.5;       // duty cycle as a fraction
 
   // Get position of first rising edge in seconds
   double GetRisingEdgePos();
@@ -22,6 +21,7 @@ public:
 
 class HDLSignal {
 public:
+  HDLSignal(string _name, HDLPortType *_type);
   string name;
   HDLPortType *sigType;
   vector<HDLDevicePort *> connectedPorts;
