@@ -4,7 +4,7 @@
 #include "DataTypes.hpp"
 #include "Operations.hpp"
 #include "ParserCore.hpp"
-
+#include "hdl/HDLDesign.hpp"
 #include <map>
 #include <string>
 #include <vector>
@@ -60,6 +60,10 @@ public:
   virtual bool CanPushInto();
   // Process a push into a stream
   virtual EvalObject *ApplyPushInto(Evaluator *state, EvalObject *value);
+  // Synthesise the EvalObject into a HDL design, connecting the output to a
+  // given signal. Throws if the EvalObject is not synthesisable
+  virtual void Synthesise(HDLGen::HDLDesign *design,
+                          HDLGen::HDLSignal *outputNet);
 
 protected:
   int base_id = 0;
@@ -279,7 +283,6 @@ public:
   bool HasConstantValue(Evaluator *state);
   EvalObject *GetConstantValue(Evaluator *state);
   EvalObject *ApplyToState(Evaluator *state);
-  void AssignValue(Evaluator *state, EvalObject *value);
   vector<EvalObject *> GetOperands();
   EvalObject *GetValue(Evaluator *state);
 

@@ -1,5 +1,6 @@
 
 #pragma once
+#include "hdl/HDLPortType.hpp"
 #include <string>
 #include <vector>
 using namespace std;
@@ -20,6 +21,8 @@ public:
 
   virtual DataType *GetBaseType();
   virtual DataType *GetMemberType(string member);
+
+  virtual HDLGen::HDLPortType *GetHDLType();
 };
 
 /*
@@ -37,6 +40,8 @@ public:
   bool Equals(DataType *other);
   // If true, is implicit type
   bool is_auto = false;
+
+  HDLGen::HDLPortType *GetHDLType();
 };
 
 /*
@@ -54,6 +59,8 @@ public:
   bool Equals(DataType *other);
   vector<int> GetDimensions();
   DataType *GetBaseType();
+
+  HDLGen::HDLPortType *GetHDLType();
 };
 /*
 A stream or stream2d
@@ -74,6 +81,8 @@ public:
   bool Equals(DataType *other);
   vector<int> GetDimensions();
   DataType *GetBaseType();
+
+  HDLGen::HDLPortType *GetHDLType();
 };
 
 // An entry in a datastructure
@@ -101,6 +110,8 @@ public:
   bool Equals(DataType *other);
   vector<int> GetDimensions();
   DataType *GetMemberType(string member);
+
+  HDLGen::HDLPortType *GetHDLType();
 };
 
 /*
@@ -119,6 +130,8 @@ public:
 
   DataType *GetBaseType();
   bool is_rom = false;
+
+  HDLGen::HDLPortType *GetHDLType();
 };
 
 class DeclaredConstant;

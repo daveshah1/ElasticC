@@ -396,4 +396,12 @@ SingleCycleEvaluator::FindFirstNotMatchingConds(EvalObject *&value, int index) {
 }
 
 SingleCycleEvaluator::~SingleCycleEvaluator() {}
+
+ConstantParser::ConstantParser(Parser::GlobalScope *_gs)
+    : SingleCycleEvaluator(gs){};
+
+BitConstant ConstantParser::ParseConstexpr(Parser::Expression *expr) {
+  return EvaluateExpression(expr)->GetConstantValue(this)->GetScalarConstValue(
+      this);
+}
 }

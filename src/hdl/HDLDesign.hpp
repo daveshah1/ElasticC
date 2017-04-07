@@ -18,6 +18,10 @@ public:
   vector<HDLPort *> ports;
   vector<HDLDevice *> devices;
 
+  void AddSignal(HDLSignal *sig);
+  HDLSignal *CreateTempSignal(HDLPortType *type, string prefix = "");
+  void AddDevice(HDLDevice *dev);
+
   void GenerateVHDLFile(ostream &out);
 };
 }

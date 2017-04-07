@@ -67,6 +67,11 @@ EvalObject *EvalObject::ApplyPushInto(Evaluator *state, EvalObject *value) {
   return EvalNull;
 }
 
+void EvalObject::Synthesise(HDLGen::HDLDesign *design,
+                            HDLGen::HDLSignal *outputNet) {
+  throw eval_error("===" + GetID() + "=== cannot be synthesised to HDL");
+}
+
 /* EvalVariable */
 EvalVariable::EvalVariable(EvaluatorVariable *_var) : EvalObject(), var(_var){};
 

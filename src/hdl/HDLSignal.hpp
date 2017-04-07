@@ -2,6 +2,7 @@
 #include "HDLDevice.hpp"
 #include "HDLDevicePort.hpp"
 #include "HDLPortType.hpp"
+#include <iostream>
 #include <string>
 #include <vector>
 using namespace std;
@@ -25,6 +26,14 @@ public:
   HDLPortType *sigType;
   vector<HDLDevicePort *> connectedPorts;
   ClockInfo clockInfo; // clock type signals only
+
+  // Connect another signal to this one, replacing all instances of this signal
+  // with the passed one
+  void ConnectToSignal(HDLSignal *other);
+  // Connect to a device port
+  void ConnectToPort(HDLDevicePort *port);
+  // Generate a VHDL signal definition
+  void GenerateVHDL(ostream &vhdl);
 };
 }
 }
