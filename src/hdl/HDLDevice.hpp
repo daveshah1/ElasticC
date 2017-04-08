@@ -1,4 +1,5 @@
 #pragma once
+#include "timing/DeviceTiming.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -7,15 +8,22 @@ namespace RapidHLS {
 namespace HDLGen {
 class HDLDevicePort;
 class HDLSignal;
+
 class HDLDevice {
 public:
   virtual string GetInstanceName() = 0;
   virtual vector<HDLDevicePort *> &GetPorts() = 0;
 
+  // Return VHDL packages required by the device
+  virtual vector<string> GetVHDLDeps();
   // Generate VHDL prefix (signals, constants, types etc)
   virtual void GenerateVHDLPrefix(ostream &vhdl);
   // Generate VHDL for the device itself
   virtual void GenerateVHDL(ostream &vhdl);
+
+  // Annotate timing and latencies for this device only
+  virtual void AnnotateTiming(DeviceTiming *model);
+  virtual void AnnotateLatency(DeviceTiming *model);
 };
 // Represents some arbitrary HDL device; for example a vendor provided primitive
 // or user created VHDL component
@@ -31,8 +39,12 @@ public:
   string GetInstanceName();
   vector<HDLDevicePort *> &GetPorts();
 
+  vector<string> GetVHDLDeps();
   void GenerateVHDLPrefix(ostream &vhdl);
   void GenerateVHDL(ostream &vhdl);
+
+  void AnnotateTiming(DeviceTiming *model);
+  void AnnotateLatency(DeviceTiming *model);
 
 private:
   string inst_name;

@@ -34,6 +34,15 @@ public:
   void ConnectToPort(HDLDevicePort *port);
   // Generate a VHDL signal definition
   void GenerateVHDL(ostream &vhdl);
+
+  // Timing and latency data
+  HDLSignal *clockDomain = nullptr;
+  // Clock to valid delay in ns
+  double timing_delay = 0;
+  // Pipeline latency from input to signal
+  int pipeline_latency = 0;
+  // Force no pipelining to occur to this signal
+  bool dont_pipeline = false;
 };
 }
 }

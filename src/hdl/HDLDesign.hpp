@@ -23,6 +23,9 @@ public:
   void AddDevice(HDLDevice *dev);
 
   void GenerateVHDLFile(ostream &out);
+
+  // Special constant forced signals
+  HDLSignal *gnd, *vcc;
 };
 }
 }
