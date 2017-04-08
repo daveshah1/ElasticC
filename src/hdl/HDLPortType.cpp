@@ -5,6 +5,13 @@ using namespace std;
 namespace RapidHLS {
 namespace HDLGen {
 
+bool HDLPortType::IsSigned() const { return false; }
+
+string HDLPortType::VHDLCastFrom(const HDLPortType *other,
+                                 const string &value) const {
+  return value;
+}
+
 string LogicSignalPortType::GetVHDLType() const { return "std_logic"; }
 
 int LogicSignalPortType::GetWidth() const { return 1; }

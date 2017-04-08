@@ -20,8 +20,11 @@ public:
   void AnnotateTiming(DeviceTiming *model);
   void AnnotateLatency(DeviceTiming *model);
 
+  ~OperationHDLDevice();
+
 private:
   static int serial;
+  string inst_name;
   OperationType oper;
   vector<HDLDevicePort *> ports;
 };
@@ -40,6 +43,8 @@ public:
 
   void AnnotateTiming(DeviceTiming *model);
   void AnnotateLatency(DeviceTiming *model);
+
+  ~RegisterHDLDevice();
 
 private:
   static int serial;
@@ -61,6 +66,8 @@ public:
 
   void AnnotateTiming(DeviceTiming *model);
   void AnnotateLatency(DeviceTiming *model);
+
+  ~MultiplexerHDLDevice();
 
 private:
   static int serial;

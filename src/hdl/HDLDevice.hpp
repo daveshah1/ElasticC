@@ -47,6 +47,7 @@ public:
   void AnnotateLatency(DeviceTiming *model);
 
 private:
+  static int serial;
   string inst_name;
 };
 };

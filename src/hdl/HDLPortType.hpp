@@ -9,7 +9,7 @@ class HDLPortType {
 public:
   virtual string GetVHDLType() const = 0;
   virtual int GetWidth() const = 0;
-
+  virtual bool IsSigned() const;
   virtual string VHDLCastFrom(const HDLPortType *other,
                               const string &value) const;
 };
@@ -41,6 +41,7 @@ public:
   NumericPortType(int _width, bool _signed);
   virtual string GetVHDLType() const;
   virtual int GetWidth() const;
+  virtual bool IsSigned() const;
   virtual string VHDLCastFrom(const HDLPortType *other,
                               const string &value) const;
 
