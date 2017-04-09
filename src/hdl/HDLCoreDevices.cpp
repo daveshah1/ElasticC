@@ -51,11 +51,15 @@ void OperationHDLDevice::GenerateVHDL(ostream &vhdl) {
   if ((oper == OperationType::B_ADD) || (oper == OperationType::B_SUB)) {
     width += 1;
   }
-  // Multiplication keeps operand types to allow signed/unsigned and mixed
-  // width multiplies, everything else casts to a common type
+  // Multiplication and comparison keeps operand types to allow signed/unsigned
+  // and mixed
+  // width multiplies/compares, everything else casts to a common type
   for (int i = 0; i < ports.size() - 1; i++) {
     HDLPortType *type = ports.at(i)->type;
-    if (oper == OperationType::B_MUL) {
+    if ((oper == OperationType::B_MUL) || (oper == OperationType::B_EQ) ||
+        (oper == OperationType::B_NEQ) || (oper == OperationType::B_GT) ||
+        (oper == OperationType::B_LT) || (oper == OperationType::B_GTE) ||
+        (oper == OperationType::B_LTE)) {
       operands.at(i) = NumericPortType(type->GetWidth(), type->IsSigned())
                            .VHDLCastFrom(type, operands.at(i));
     } else {
@@ -63,34 +67,97 @@ void OperationHDLDevice::GenerateVHDL(ostream &vhdl) {
           NumericPortType(width, is_signed).VHDLCastFrom(type, operands.at(i));
     }
   }
+  // Logical operations use a vhdl when/esle construct so can't be wrapped in a
+  // cast
+  bool is_logical = false;
+
+  // One and zero cast to result type for use in logical operations
+  NumericPortType logConstType(1, false);
+  string zero = ports.back()->connectedNet->sigType->VHDLCastFrom(
+      &logConstType, "to_unsigned(0, 1)");
+  string one = ports.back()->connectedNet->sigType->VHDLCastFrom(
+      &logConstType, "to_unsigned(1, 1)");
 
   switch (oper) {
-  case B_ADD:
+  case OperationType::B_ADD:
     value = operands.at(0) + " + " + operands.at(1);
     break;
-  case B_SUB:
+  case OperationType::B_SUB:
     value = operands.at(0) + " - " + operands.at(1);
     break;
-  case B_MUL:
+  case OperationType::B_MUL:
     value = operands.at(0) + " * " + operands.at(1);
     break;
-  case B_BWAND:
+  case OperationType::B_BWAND:
     value = operands.at(0) + " and " + operands.at(1);
     break;
-  case B_BWOR:
+  case OperationType::B_BWOR:
     value = operands.at(0) + " or " + operands.at(1);
     break;
-  case B_BWXOR:
+  case OperationType::B_BWXOR:
     value = operands.at(0) + " xor " + operands.at(1);
     break;
-  // TODO: remaining operations
+  case OperationType::U_MINUS:
+    value = "0 - " + operands.at(0);
+    break;
+  case OperationType::U_BWNOT:
+    value = "not " + operands.at(0);
+    break;
+  case OperationType::B_EQ:
+    value = one + " when " + operands.at(0) + " = " + operands.at(1) +
+            " else " + zero;
+    break;
+  case OperationType::B_NEQ:
+    value = one + " when " + operands.at(0) + " /= " + operands.at(1) +
+            " else " + zero;
+    break;
+  case OperationType::B_LT:
+    value = one + " when " + operands.at(0) + " < " + operands.at(1) +
+            " else " + zero;
+    break;
+  case OperationType::B_GT:
+    value = one + " when " + operands.at(0) + " > " + operands.at(1) +
+            " else " + zero;
+    break;
+  case OperationType::B_LTE:
+    value = one + " when " + operands.at(0) + " <= " + operands.at(1) +
+            " else " + zero;
+    break;
+  case OperationType::B_GTE:
+    value = one + " when " + operands.at(0) + " >= " + operands.at(1) +
+            " else " + zero;
+    break;
+  case OperationType::B_LAND:
+    value = one + " when " + operands.at(0) + " /= 0 and " + operands.at(1) +
+            " /= 0 else " + zero;
+    break;
+  case OperationType::B_LOR:
+    value = one + " when " + operands.at(0) + " /= 0 or " + operands.at(1) +
+            " /= 0 else " + zero;
+    break;
+  case OperationType::U_LNOT:
+    value = one + " when " + operands.at(0) + " == 0 else " + zero;
+    break;
+  case OperationType::B_LS:
+    value = "shift_left(" + operands.at(0) + ", to_integer(" + operands.at(1) +
+            "))";
+    break;
+  case OperationType::B_RS:
+    value = "shift_right(" + operands.at(0) + ", to_integer(" + operands.at(1) +
+            "))";
+    break;
   default:
     throw runtime_error("operation type not supported in HDL");
   }
 
   NumericPortType resType(width, is_signed);
   vhdl << "\t" << ports.back()->connectedNet->name << " <= ";
-  vhdl << ports.back()->connectedNet->sigType->VHDLCastFrom(&resType, value);
+  if (is_logical) {
+    vhdl << value;
+  } else {
+    vhdl << ports.back()->connectedNet->sigType->VHDLCastFrom(&resType, value);
+  }
+  vhdl << ";" << endl;
 }
 
 void OperationHDLDevice::AnnotateTiming(DeviceTiming *model) {
