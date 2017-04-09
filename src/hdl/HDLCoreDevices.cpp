@@ -187,5 +187,66 @@ OperationHDLDevice::~OperationHDLDevice() {
 }
 
 int OperationHDLDevice::serial = 0;
+
+RegisterHDLDevice::RegisterHDLDevice(HDLSignal *d, HDLSignal *clk, HDLSignal *q,
+                                     HDLSignal *en, HDLSignal *rst,
+                                     bool _is_pipeline)
+    : is_pipeline(_is_pipeline) {
+  inst_name = "reg_" + to_string(serial++);
+  ports.push_back(
+      new HDLDevicePort("d", this, d->sigType, d, PortDirection::Input));
+  ports.push_back(
+      new HDLDevicePort("clk", this, clk->sigType, clk, PortDirection::Input));
+  ports.push_back(
+      new HDLDevicePort("q", this, q->sigType, q, PortDirection::Output));
+  ports.push_back(
+      new HDLDevicePort("en", this, en->sigType, en, PortDirection::Input));
+  ports.push_back(
+      new HDLDevicePort("rst", this, rst->sigType, rst, PortDirection::Input));
+}
+
+string RegisterHDLDevice::GetInstanceName() { return inst_name; }
+
+vector<HDLDevicePort *> &RegisterHDLDevice::GetPorts() { return ports; };
+
+vector<string> RegisterHDLDevice::GetVHDLDeps() {
+  return vector<string>{"ieee.std_logic_1164.all", "ieee.numeric_std.all"};
+}
+
+void RegisterHDLDevice::GenerateVHDLPrefix(ostream &vhdl) {}
+
+void RegisterHDLDevice::GenerateVHDL(ostream &vhdl) {
+  string clksig = ports.at(1)->connectedNet->name;
+  vhdl << "\tprocess(" << clksig << ")" << endl;
+  vhdl << "\tbegin" << endl;
+  vhdl << "\t\tif rising_edge(clksig) then" << endl;
+  vhdl << "\t\t\tif " << ports.at(4)->connectedNet->name << " = '1' then"
+       << endl;
+  vhdl << "\t\t\t\t" << ports.at(2)->connectedNet->name
+       << " <= " << ports.at(2)->type->GetZero() << ";" << endl;
+  vhdl << "\t\t\telsif " << ports.at(3)->connectedNet->name << " = '1' then"
+       << endl;
+  vhdl << "\t\t\t\t" << ports.at(2)->connectedNet->name << " <= "
+       << ports.at(2)->type->VHDLCastFrom(ports.at(0)->type,
+                                          ports.at(0)->connectedNet->name)
+       << ";" << endl;
+  vhdl << "\t\t\tend if;" << endl;
+  vhdl << "\t\tend if;" << endl;
+  vhdl << "\tend process;" << endl << endl;
+}
+
+void RegisterHDLDevice::AnnotateTiming(DeviceTiming *model) {
+  ports.at(2)->connectedNet->timing_delay = model->GetFFPropogationDelay();
+}
+void RegisterHDLDevice::AnnotateLatency(DeviceTiming *model) {
+  ports.at(2)->connectedNet->pipeline_latency =
+      ports.at(0)->connectedNet->pipeline_latency + (is_pipeline ? 1 : 0);
+}
+
+RegisterHDLDevice::~RegisterHDLDevice() {
+  for_each(ports.begin(), ports.end(), [](HDLDevicePort *p) { delete p; });
+}
+
+int RegisterHDLDevice::serial = 0;
 }
 }

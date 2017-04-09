@@ -1,4 +1,5 @@
 #pragma once
+#include "BitConstant.hpp"
 #include "HDLDevice.hpp"
 #include "Operations.hpp"
 using namespace std;
@@ -32,8 +33,8 @@ private:
 // A basic register, either for a functional delay or for pipelining
 class RegisterHDLDevice : public HDLDevice {
 public:
-  RegisterHDLDevice(HDLSignal *d, HDLSignal *q, HDLSignal *en, HDLSignal *rst,
-                    bool is_pipeline = false);
+  RegisterHDLDevice(HDLSignal *d, HDLSignal *clk, HDLSignal *q, HDLSignal *en,
+                    HDLSignal *rst, bool _is_pipeline = false);
   string GetInstanceName();
   vector<HDLDevicePort *> &GetPorts();
 
@@ -48,6 +49,7 @@ public:
 
 private:
   static int serial;
+  string inst_name;
   bool is_pipeline;
   vector<HDLDevicePort *> ports;
 };
@@ -72,6 +74,29 @@ public:
 private:
   static int serial;
   int size = 2;
+  vector<HDLDevicePort *> ports;
+};
+
+// A device which outputs a constant
+class ConstantHDLDevice : public HDLDevice {
+public:
+  ConstantHDLDevice(BitConstant _value, HDLSignal *output);
+  string GetInstanceName();
+  vector<HDLDevicePort *> &GetPorts();
+
+  vector<string> GetVHDLDeps();
+  void GenerateVHDLPrefix(ostream &vhdl);
+  void GenerateVHDL(ostream &vhdl);
+
+  void AnnotateTiming(DeviceTiming *model);
+  void AnnotateLatency(DeviceTiming *model);
+
+  ~ConstantHDLDevice();
+
+private:
+  static int serial;
+  BitConstant value;
+  string inst_name;
   vector<HDLDevicePort *> ports;
 };
 };

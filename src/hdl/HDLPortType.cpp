@@ -25,6 +25,8 @@ string LogicSignalPortType::VHDLCastFrom(const HDLPortType *other,
   }
 };
 
+string LogicSignalPortType::GetZero() const { return "'0'"; }
+
 LogicVectorPortType::LogicVectorPortType(int _width) : width(_width){};
 
 string LogicVectorPortType::GetVHDLType() const {
@@ -58,6 +60,8 @@ string LogicVectorPortType::VHDLCastFrom(const HDLPortType *other,
   }
 };
 
+string LogicVectorPortType::GetZero() const { return zeros(width); };
+
 NumericPortType::NumericPortType(int _width, bool _signed)
     : width(_width), is_signed(_signed){};
 
@@ -89,5 +93,9 @@ string NumericPortType::VHDLCastFrom(const HDLPortType *other,
   }
   return curr_value;
 }
+
+string NumericPortType::GetZero() const {
+  return string(is_signed ? "signed'(" : "unsigned'(") + zeros(width) + ")";
+};
 }
 }
