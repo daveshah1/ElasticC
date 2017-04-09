@@ -4,6 +4,7 @@
 #include "EvaluatorState.hpp"
 #include "Operations.hpp"
 #include "Util.hpp"
+#include "hdl/HDLCoreDevices.hpp"
 #include <algorithm>
 #include <iterator>
 #include <stdexcept>
@@ -67,7 +68,7 @@ EvalObject *EvalObject::ApplyPushInto(Evaluator *state, EvalObject *value) {
   return EvalNull;
 }
 
-void EvalObject::Synthesise(HDLGen::HDLDesign *design,
+void EvalObject::Synthesise(Evaluator *state, HDLGen::HDLDesign *design,
                             HDLGen::HDLSignal *outputNet) {
   throw eval_error("===" + GetID() + "=== cannot be synthesised to HDL");
 }
@@ -212,6 +213,11 @@ DataType *EvalConstant::GetDataType(Evaluator *state) {
 }
 
 BitConstant EvalConstant::GetScalarConstValue(Evaluator *state) { return val; };
+
+void EvalConstant::Synthesise(Evaluator *state, HDLGen::HDLDesign *design,
+                              HDLGen::HDLSignal *outputNet) {
+  design->AddDevice(new HDLGen::ConstantHDLDevice(val, outputNet));
+}
 
 EvalArray::EvalArray(ArrayType *_arrType, const vector<EvalObject *> &_items)
     : EvalObject(), arrType(_arrType), items(_items){};
@@ -511,6 +517,22 @@ EvalObject *EvalBasicOperation::GetResult(Evaluator *state,
       return new EvalBasicOperation(type, operands);
     }
   }
+}
+
+void EvalBasicOperation::Synthesise(Evaluator *state, HDLGen::HDLDesign *design,
+                                    HDLGen::HDLSignal *outputNet) {
+  vector<HDLGen::HDLSignal *> operandSigs;
+
+  transform(operands.begin(), operands.end(), back_inserter(operandSigs),
+            [design, state](EvalObject *op) {
+              HDLGen::HDLSignal *res = design->CreateTempSignal(
+                  op->GetDataType(state)->GetHDLType());
+              op->Synthesise(state, design, res);
+              return res;
+            });
+
+  design->AddDevice(
+      new HDLGen::OperationHDLDevice(type, operandSigs, outputNet));
 }
 
 EvalArrayAccess::EvalArrayAccess(EvalObject *_base, vector<EvalObject *> _index)

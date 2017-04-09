@@ -62,7 +62,7 @@ public:
   virtual EvalObject *ApplyPushInto(Evaluator *state, EvalObject *value);
   // Synthesise the EvalObject into a HDL design, connecting the output to a
   // given signal. Throws if the EvalObject is not synthesisable
-  virtual void Synthesise(HDLGen::HDLDesign *design,
+  virtual void Synthesise(Evaluator *state, HDLGen::HDLDesign *design,
                           HDLGen::HDLSignal *outputNet);
 
 protected:
@@ -101,6 +101,9 @@ public:
   EvalObject *GetConstantValue(Evaluator *state);
   DataType *GetDataType(Evaluator *state);
   BitConstant GetScalarConstValue(Evaluator *state);
+
+  void Synthesise(Evaluator *state, HDLGen::HDLDesign *design,
+                  HDLGen::HDLSignal *outputNet);
 
 private:
   BitConstant val;
@@ -237,6 +240,9 @@ public:
   EvalObject *GetResult(Evaluator *state, const vector<EvalObject *> &operands);
   EvalObject *GetResult(Evaluator *state, const vector<EvalObject *> &operands,
                         OperationType type);
+
+  void Synthesise(Evaluator *state, HDLGen::HDLDesign *design,
+                  HDLGen::HDLSignal *outputNet);
 
 private:
   OperationType type;

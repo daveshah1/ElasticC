@@ -238,6 +238,7 @@ void RegisterHDLDevice::GenerateVHDL(ostream &vhdl) {
 void RegisterHDLDevice::AnnotateTiming(DeviceTiming *model) {
   ports.at(2)->connectedNet->timing_delay = model->GetFFPropogationDelay();
 }
+
 void RegisterHDLDevice::AnnotateLatency(DeviceTiming *model) {
   ports.at(2)->connectedNet->pipeline_latency =
       ports.at(0)->connectedNet->pipeline_latency + (is_pipeline ? 1 : 0);
@@ -248,5 +249,41 @@ RegisterHDLDevice::~RegisterHDLDevice() {
 }
 
 int RegisterHDLDevice::serial = 0;
+
+ConstantHDLDevice::ConstantHDLDevice(BitConstant _value, HDLSignal *output)
+    : value(_value) {
+  inst_name = "const_" + to_string(serial++);
+  ports.push_back(new HDLDevicePort("output", this, output->sigType, output,
+                                    PortDirection::Output));
+};
+
+string ConstantHDLDevice::GetInstanceName() { return inst_name; };
+
+vector<HDLDevicePort *> &ConstantHDLDevice::GetPorts() { return ports; }
+
+vector<string> ConstantHDLDevice::GetVHDLDeps() { return {}; }
+
+void ConstantHDLDevice::GenerateVHDLPrefix(ostream &vhdl) {}
+
+void ConstantHDLDevice::GenerateVHDL(ostream &vhdl) {
+  NumericPortType cType(value.bits.size(), value.is_signed);
+  vhdl << "\t" << ports.at(0)->connectedNet->name << " <= "
+       << ports.at(0)->type->VHDLCastFrom(
+              &cType, string(value.is_signed ? "signed'(" : "unsigned'(") +
+                          value.to_string() + ")")
+       << ";" << endl;
+}
+
+void ConstantHDLDevice::AnnotateTiming(DeviceTiming *model) {
+  ports.at(0)->connectedNet->timing_delay = 0;
+}
+
+void ConstantHDLDevice::AnnotateLatency(DeviceTiming *model) {
+  ports.at(0)->connectedNet->pipeline_latency = 0;
+}
+
+ConstantHDLDevice::~ConstantHDLDevice() {
+  for_each(ports.begin(), ports.end(), [](HDLDevicePort *p) { delete p; });
+}
 }
 }
