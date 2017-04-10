@@ -2,6 +2,7 @@
 #include "HDLDevice.hpp"
 #include "HDLDevicePort.hpp"
 #include "HDLPortType.hpp"
+#include "HDLTiming.hpp"
 #include <iostream>
 #include <string>
 #include <vector>
@@ -38,9 +39,9 @@ public:
   // Timing and latency data
   HDLSignal *clockDomain = nullptr;
   // Clock to valid delay in ns
-  double timing_delay = 0;
+  HDLTimingValue<double> timing_delay;
   // Pipeline latency from input to signal
-  int pipeline_latency = 0;
+  HDLTimingValue<int> pipeline_latency;
   // Force no pipelining to occur to this signal
   bool dont_pipeline = false;
 };

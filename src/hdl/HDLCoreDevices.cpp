@@ -161,7 +161,7 @@ void OperationHDLDevice::GenerateVHDL(ostream &vhdl) {
 }
 
 void OperationHDLDevice::AnnotateTiming(DeviceTiming *model) {
-  double inp_delay =
+  HDLTimingValue<double> inp_delay =
       (*max_element(ports.begin(), ports.end() - 1, [](HDLDevicePort *a,
                                                        HDLDevicePort *b) {
         return a->connectedNet->timing_delay < b->connectedNet->timing_delay;
@@ -173,7 +173,7 @@ void OperationHDLDevice::AnnotateTiming(DeviceTiming *model) {
 }
 
 void OperationHDLDevice::AnnotateLatency(DeviceTiming *model) {
-  int inp_latency =
+  HDLTimingValue<int> inp_latency =
       (*max_element(ports.begin(), ports.end() - 1, [](HDLDevicePort *a,
                                                        HDLDevicePort *b) {
         return a->connectedNet->pipeline_latency <
@@ -236,7 +236,8 @@ void RegisterHDLDevice::GenerateVHDL(ostream &vhdl) {
 }
 
 void RegisterHDLDevice::AnnotateTiming(DeviceTiming *model) {
-  ports.at(2)->connectedNet->timing_delay = model->GetFFPropogationDelay();
+  ports.at(2)->connectedNet->timing_delay = HDLTimingValue<double>(
+      ports.at(1)->connectedNet, model->GetFFPropogationDelay());
 }
 
 void RegisterHDLDevice::AnnotateLatency(DeviceTiming *model) {
@@ -275,11 +276,11 @@ void ConstantHDLDevice::GenerateVHDL(ostream &vhdl) {
 }
 
 void ConstantHDLDevice::AnnotateTiming(DeviceTiming *model) {
-  ports.at(0)->connectedNet->timing_delay = 0;
+  ports.at(0)->connectedNet->timing_delay = HDLTimingValue<double>();
 }
 
 void ConstantHDLDevice::AnnotateLatency(DeviceTiming *model) {
-  ports.at(0)->connectedNet->pipeline_latency = 0;
+  ports.at(0)->connectedNet->pipeline_latency = HDLTimingValue<int>();
 }
 
 ConstantHDLDevice::~ConstantHDLDevice() {
