@@ -68,7 +68,7 @@ EvalObject *EvalObject::ApplyPushInto(Evaluator *state, EvalObject *value) {
   return EvalNull;
 }
 
-void EvalObject::Synthesise(Evaluator *state, HDLGen::HDLDesign *design,
+void EvalObject::Synthesise(Evaluator *state, const SynthContext &sc,
                             HDLGen::HDLSignal *outputNet) {
   throw eval_error("===" + GetID() + "=== cannot be synthesised to HDL");
 }
@@ -214,9 +214,9 @@ DataType *EvalConstant::GetDataType(Evaluator *state) {
 
 BitConstant EvalConstant::GetScalarConstValue(Evaluator *state) { return val; };
 
-void EvalConstant::Synthesise(Evaluator *state, HDLGen::HDLDesign *design,
+void EvalConstant::Synthesise(Evaluator *state, const SynthContext &sc,
                               HDLGen::HDLSignal *outputNet) {
-  design->AddDevice(new HDLGen::ConstantHDLDevice(val, outputNet));
+  sc.design->AddDevice(new HDLGen::ConstantHDLDevice(val, outputNet));
 }
 
 EvalArray::EvalArray(ArrayType *_arrType, const vector<EvalObject *> &_items)
@@ -519,19 +519,19 @@ EvalObject *EvalBasicOperation::GetResult(Evaluator *state,
   }
 }
 
-void EvalBasicOperation::Synthesise(Evaluator *state, HDLGen::HDLDesign *design,
+void EvalBasicOperation::Synthesise(Evaluator *state, const SynthContext &sc,
                                     HDLGen::HDLSignal *outputNet) {
   vector<HDLGen::HDLSignal *> operandSigs;
 
   transform(operands.begin(), operands.end(), back_inserter(operandSigs),
-            [design, state](EvalObject *op) {
-              HDLGen::HDLSignal *res = design->CreateTempSignal(
+            [sc, state](EvalObject *op) {
+              HDLGen::HDLSignal *res = sc.design->CreateTempSignal(
                   op->GetDataType(state)->GetHDLType());
-              op->Synthesise(state, design, res);
+              op->Synthesise(state, sc, res);
               return res;
             });
 
-  design->AddDevice(
+  sc.design->AddDevice(
       new HDLGen::OperationHDLDevice(type, operandSigs, outputNet));
 }
 
@@ -683,6 +683,15 @@ vector<EvalObject *> EvalRegister::GetOperands() { return {input}; }
 
 EvalObject *EvalRegister::GetValue(Evaluator *state) {
   return new EvalRegister(input->GetValue(state));
+}
+
+void EvalRegister::Synthesise(Evaluator *state, const SynthContext &sc,
+                              HDLGen::HDLSignal *outputNet) {
+  HDLGen::HDLSignal *inpSig =
+      sc.design->CreateTempSignal(input->GetDataType(state)->GetHDLType());
+  input->Synthesise(state, sc, inpSig);
+  sc.design->AddDevice(new HDLGen::RegisterHDLDevice(
+      inpSig, sc.clock, outputNet, sc.clock_enable, sc.reset, false));
 }
 
 EvalNull_class::EvalNull_class() : EvalObject(){};
