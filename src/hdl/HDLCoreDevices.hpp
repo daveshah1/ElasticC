@@ -99,5 +99,28 @@ private:
   string inst_name;
   vector<HDLDevicePort *> ports;
 };
+
+// A buffer which passes through values without delay but will automatically
+// typecast as needed
+class BufferHDLDevice : public HDLDevice {
+public:
+  BufferHDLDevice(HDLSignal *in, HDLSignal *out);
+  string GetInstanceName();
+  vector<HDLDevicePort *> &GetPorts();
+
+  vector<string> GetVHDLDeps();
+  void GenerateVHDLPrefix(ostream &vhdl);
+  void GenerateVHDL(ostream &vhdl);
+
+  void AnnotateTiming(DeviceTiming *model);
+  void AnnotateLatency(DeviceTiming *model);
+
+  ~BufferHDLDevice();
+
+private:
+  static int serial;
+  string inst_name;
+  vector<HDLDevicePort *> ports;
+};
 };
 };

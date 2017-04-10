@@ -285,5 +285,45 @@ void ConstantHDLDevice::AnnotateLatency(DeviceTiming *model) {
 ConstantHDLDevice::~ConstantHDLDevice() {
   for_each(ports.begin(), ports.end(), [](HDLDevicePort *p) { delete p; });
 }
+
+int ConstantHDLDevice::serial = 0;
+
+BufferHDLDevice::BufferHDLDevice(HDLSignal *in, HDLSignal *out) {
+  inst_name = "buf_" + to_string(serial++);
+  ports.push_back(
+      new HDLDevicePort("in", this, in->sigType, in, PortDirection::Input));
+  ports.push_back(
+      new HDLDevicePort("out", this, out->sigType, out, PortDirection::Output));
+}
+
+string BufferHDLDevice::GetInstanceName() { return inst_name; }
+
+vector<HDLDevicePort *> &BufferHDLDevice::GetPorts() { return ports; }
+
+vector<string> BufferHDLDevice::GetVHDLDeps() { return {}; }
+
+void BufferHDLDevice::GenerateVHDLPrefix(ostream &vhdl) {}
+
+void BufferHDLDevice::GenerateVHDL(ostream &vhdl) {
+  vhdl << "\t" << ports.at(1)->connectedNet->name << " <= "
+       << ports.at(1)->type->VHDLCastFrom(ports.at(0)->type,
+                                          ports.at(0)->connectedNet->name)
+       << ";" << endl;
+}
+
+void BufferHDLDevice::AnnotateTiming(DeviceTiming *model) {
+  ports.at(1)->connectedNet->timing_delay =
+      ports.at(0)->connectedNet->timing_delay;
+}
+void BufferHDLDevice::AnnotateLatency(DeviceTiming *model) {
+  ports.at(1)->connectedNet->pipeline_latency =
+      ports.at(0)->connectedNet->pipeline_latency;
+}
+
+BufferHDLDevice::~BufferHDLDevice() {
+  for_each(ports.begin(), ports.end(), [](HDLDevicePort *p) { delete p; });
+}
+
+int BufferHDLDevice::serial = 0;
 }
 }
