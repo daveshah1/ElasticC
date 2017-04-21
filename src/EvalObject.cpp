@@ -129,8 +129,8 @@ EvalVariable::ApplyArraySubscriptRead(Evaluator *state,
         if (indval < lastDim) {
           offset += indval;
         } else {
-          throw eval_error("array index out of bounds for variable ===" +
-                           var->name + "===");
+          throw eval_error(
+              "array index out of bounds for variable ===" + var->name + "===");
         }
       }
       if (isConst) {
@@ -169,8 +169,8 @@ void EvalVariable::ApplyArraySubscriptWrite(Evaluator *state,
         if (indval < lastDim) {
           offset += indval;
         } else {
-          throw eval_error("array index out of bounds for variable ===" +
-                           var->name + "===");
+          throw eval_error(
+              "array index out of bounds for variable ===" + var->name + "===");
         }
       }
       if (isConst) {
@@ -197,6 +197,12 @@ void EvalVariable::AssignValue(Evaluator *state, EvalObject *value) {
 }
 EvalObject *EvalVariable::GetValue(Evaluator *state) {
   return var->HandleRead(state);
+}
+
+void EvalVariable::Synthesise(Evaluator *state, const SynthContext &sc,
+                              HDLGen::HDLSignal *outputNet) {
+  sc.design->AddDevice(
+      new HDLGen::BufferHDLDevice(sc.varSignals.at(var), outputNet));
 }
 
 /*EvalConstant*/
@@ -340,6 +346,14 @@ vector<EvalObject *> EvalCast::GetOperands() { return {operand}; }
 
 EvalObject *EvalCast::GetValue(Evaluator *state) {
   return new EvalCast(castTo, operand->GetValue(state));
+}
+
+void EvalCast::Synthesise(Evaluator *state, const SynthContext &sc,
+                          HDLGen::HDLSignal *outputNet) {
+  HDLGen::HDLSignal *inputNet =
+      sc.design->CreateTempSignal(operand->GetDataType(state)->GetHDLType());
+  operand->Synthesise(state, sc, inputNet);
+  sc.design->AddDevice(new HDLGen::BufferHDLDevice(inputNet, outputNet));
 }
 
 EvalBasicOperation::EvalBasicOperation(OperationType _type,
@@ -692,6 +706,20 @@ void EvalRegister::Synthesise(Evaluator *state, const SynthContext &sc,
   input->Synthesise(state, sc, inpSig);
   sc.design->AddDevice(new HDLGen::RegisterHDLDevice(
       inpSig, sc.clock, outputNet, sc.clock_enable, sc.reset, false));
+}
+
+EvalDontCare::EvalDontCare(DataType *_type) : EvalObject(), type(_type){};
+string EvalDontCare::GetID() { return "dc_" + to_string(base_id); }
+DataType *EvalDontCare::GetDataType(Evaluator *state) { return type; }
+bool EvalDontCare::HasConstantValue(Evaluator *state) { return true; }
+EvalObject *EvalDontCare::GetConstantValue(Evaluator *state) { return this; }
+BitConstant EvalDontCare::GetScalarConstValue(Evaluator *state) { return 0; }
+EvalObject *EvalDontCare::GetValue(Evaluator *state) { return this; }
+
+void EvalDontCare::Synthesise(Evaluator *state, const SynthContext &sc,
+                              HDLGen::HDLSignal *outputNet) {
+  // TODO: proper don't care signal
+  sc.design->AddDevice(new HDLGen::ConstantHDLDevice(0, outputNet));
 }
 
 EvalNull_class::EvalNull_class() : EvalObject(){};

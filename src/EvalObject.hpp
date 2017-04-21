@@ -89,6 +89,9 @@ public:
   void AssignValue(Evaluator *state, EvalObject *value);
   EvalObject *GetValue(Evaluator *state);
 
+  void Synthesise(Evaluator *state, const SynthContext &sc,
+                  HDLGen::HDLSignal *outputNet);
+
 private:
   EvaluatorVariable *var;
 };
@@ -214,6 +217,9 @@ public:
   vector<EvalObject *> GetOperands();
   EvalObject *GetValue(Evaluator *state);
 
+  void Synthesise(Evaluator *state, const SynthContext &sc,
+                  HDLGen::HDLSignal *outputNet);
+
 private:
   IntegerType *castTo;
   EvalObject *operand;
@@ -310,17 +316,11 @@ public:
 
   bool HasConstantValue(Evaluator *state);
   EvalObject *GetConstantValue(Evaluator *state);
-  EvalObject *ApplyArraySubscriptRead(Evaluator *state,
-                                      vector<EvalObject *> subscript);
-  void ApplyArraySubscriptWrite(Evaluator *state,
-                                vector<EvalObject *> subscript,
-                                EvalObject *value);
-  EvalObject *GetStructureMember(Evaluator *state, string name);
-  void AssignStructureMember(Evaluator *state, string name, EvalObject *value);
-  EvalObject *ApplyToState(Evaluator *state);
-  void AssignValue(Evaluator *state, EvalObject *value);
-  vector<EvalObject *> GetOperands();
+  BitConstant GetScalarConstValue(Evaluator *state);
   EvalObject *GetValue(Evaluator *state);
+
+  void Synthesise(Evaluator *state, const SynthContext &sc,
+                  HDLGen::HDLSignal *outputNet);
 
 private:
   DataType *type;
