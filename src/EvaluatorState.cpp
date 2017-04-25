@@ -2,6 +2,7 @@
 #include "EvalObject.hpp"
 #include "Evaluator.hpp"
 #include "Util.hpp"
+#include "hdl/HDLCoreDevices.hpp"
 #include <algorithm>
 #include <iterator>
 #include <string>
@@ -52,8 +53,8 @@ vector<EvaluatorVariable *> EvaluatorVariable::GetAllChildren() {
 }
 
 EvaluatorVariable *EvaluatorVariable::GetChildByName(string name) {
-  throw eval_error("variable ===" + name + "=== does not contain member ===" +
-                   name + "===");
+  throw eval_error("variable ===" + name +
+                   "=== does not contain member ===" + name + "===");
 }
 
 bool EvaluatorVariable::HasDefaultValue() { return false; }
@@ -75,15 +76,15 @@ bool EvaluatorVariable::IsNonTrivialArrayAccess() { return false; };
 EvalObject *
 EvaluatorVariable::HandleSubscriptedRead(Evaluator *genst,
                                          vector<EvalObject *> index) {
-  throw eval_error("HandleSubscriptedRead not supported for variable ===" +
-                   name + "===");
+  throw eval_error(
+      "HandleSubscriptedRead not supported for variable ===" + name + "===");
 };
 
 void EvaluatorVariable::HandleSubscriptedWrite(Evaluator *genst,
                                                vector<EvalObject *> index,
                                                EvalObject *value) {
-  throw eval_error("HandleSubscriptedWrite not supported for variable ===" +
-                   name + "===");
+  throw eval_error(
+      "HandleSubscriptedWrite not supported for variable ===" + name + "===");
 }
 
 void EvaluatorVariable::HandlePush(Evaluator *genst, EvalObject *value) {
@@ -103,6 +104,8 @@ void EvaluatorVariable::SetBitOffset(int _bitoffset) {
 int EvaluatorVariable::GetBitOffset() { return bitoffset; }
 
 VariableDir EvaluatorVariable::GetDir() { return dir; }
+
+void EvaluatorVariable::Synthesise(SynthContext &sc) {}
 
 /* ScalarEvaluatorVariable */
 ScalarEvaluatorVariable::ScalarEvaluatorVariable(VariableDir _dir, string _name,
@@ -157,8 +160,40 @@ void ScalarEvaluatorVariable::HandleWrite(Evaluator *genst, EvalObject *value) {
   if (is_static) {
     genst->SetVariableValue(written_value, value);
     genst->SetVariableValue(write_enable, new EvalConstant(BitConstant(1)));
+  } else {
+    genst->SetVariableValue(this, value);
   }
-  genst->SetVariableValue(this, value);
+}
+
+void ScalarEvaluatorVariable::Synthesise(SynthContext &sc) {
+  if (sc.varSignals.find(this) != sc.varSignals.end())
+    return;
+  HDLGen::HDLSignal *sig =
+      new HDLGen::HDLSignal("sig_" + name, type->GetHDLType());
+  // Set clock domains
+  sig->pipeline_latency = HDLGen::HDLTimingValue<int>(sc.clock, 0);
+  sig->timing_delay = HDLGen::HDLTimingValue<double>(sc.clock, 0);
+
+  sc.varSignals[this] = sig;
+
+  if (is_static) {
+    write_enable->Synthesise(sc);
+    written_value->Synthesise(sc);
+    // Deal with enable gating
+    HDLGen::HDLSignal *gated_1 = sc.design->CreateTempSignal(
+        new HDLGen::LogicSignalPortType(), "enable");
+    sc.design->AddDevice(new HDLGen::OperationHDLDevice(
+        OperationType::B_BWAND,
+        {sc.varSignals.at(write_enable), sc.data_enable}, gated_1));
+    HDLGen::HDLSignal *gated_2 = sc.design->CreateTempSignal(
+        new HDLGen::LogicSignalPortType(), "enable");
+    sc.design->AddDevice(new HDLGen::OperationHDLDevice(
+        OperationType::B_BWAND, {gated_1, sc.clock_enable}, gated_2));
+
+    sc.design->AddDevice(
+        new HDLGen::RegisterHDLDevice(sc.varSignals.at(written_value), sc.clock,
+                                      sig, gated_2, sc.reset, false));
+  }
 }
 
 ArrayEvaluatorVariable::ArrayEvaluatorVariable(VariableDir _dir, string _name,

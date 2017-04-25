@@ -4,6 +4,7 @@
 #include "Operations.hpp"
 #include "ParserCore.hpp"
 #include "ParserStructures.hpp"
+#include "SynthContext.hpp"
 #include <map>
 #include <stack>
 #include <string>
@@ -99,6 +100,10 @@ public:
   virtual int GetBitOffset();
   virtual VariableDir GetDir();
 
+  // Add the variable to the HDL design, generating any necessary supporting
+  // logic
+  virtual void Synthesise(SynthContext &sc);
+
 protected:
   VariableDir dir;
 
@@ -115,6 +120,7 @@ public:
   bool HasDefaultValue();
   BitConstant GetDefaultValue();
   void SetDefaultValue(BitConstant defval);
+  void Synthesise(SynthContext &sc);
   // Static variables only
   EvaluatorVariable *GetChildByName(string name);
   vector<EvaluatorVariable *> GetAllChildren();

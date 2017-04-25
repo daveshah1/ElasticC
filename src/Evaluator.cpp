@@ -196,9 +196,9 @@ void SingleCycleEvaluator::SetVariableValue(EvaluatorVariable *var,
   } else {
     if (intt == nullptr) {
       // non-integer types require an exact match
-      throw eval_error("cannot convert type ===" +
-                       value->GetDataType(this)->GetName() + "=== to ===" +
-                       var->GetType()->GetName());
+      throw eval_error(
+          "cannot convert type ===" + value->GetDataType(this)->GetName() +
+          "=== to ===" + var->GetType()->GetName());
     } else {
       castValue = new EvalCast(intt, value);
     }
