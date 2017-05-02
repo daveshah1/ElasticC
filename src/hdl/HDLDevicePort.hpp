@@ -23,6 +23,7 @@ public:
   HDLSignal *connectedNet = nullptr;
   PortDirection dir = PortDirection::Input;
   void GenerateVHDL(ostream &vhdl, bool is_last = false);
+  void GenerateVHDLWire(ostream &vhdl);
   ~HDLDevicePort();
 };
 }

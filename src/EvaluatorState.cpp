@@ -169,7 +169,7 @@ void ScalarEvaluatorVariable::Synthesise(SynthContext &sc) {
   if (sc.varSignals.find(this) != sc.varSignals.end())
     return;
   HDLGen::HDLSignal *sig =
-      new HDLGen::HDLSignal("sig_" + name, type->GetHDLType());
+      sc.design->CreateTempSignal(type->GetHDLType(), "sig_" + name);
   // Set clock domains
   sig->pipeline_latency = HDLGen::HDLTimingValue<int>(sc.clock, 0);
   sig->timing_delay = HDLGen::HDLTimingValue<double>(sc.clock, 0);

@@ -262,7 +262,9 @@ string ConstantHDLDevice::GetInstanceName() { return inst_name; };
 
 vector<HDLDevicePort *> &ConstantHDLDevice::GetPorts() { return ports; }
 
-vector<string> ConstantHDLDevice::GetVHDLDeps() { return {}; }
+vector<string> ConstantHDLDevice::GetVHDLDeps() {
+  return vector<string>{"ieee.std_logic_1164.all", "ieee.numeric_std.all"};
+}
 
 void ConstantHDLDevice::GenerateVHDLPrefix(ostream &vhdl) {}
 
@@ -270,8 +272,9 @@ void ConstantHDLDevice::GenerateVHDL(ostream &vhdl) {
   NumericPortType cType(value.bits.size(), value.is_signed);
   vhdl << "\t" << ports.at(0)->connectedNet->name << " <= "
        << ports.at(0)->type->VHDLCastFrom(
-              &cType, string(value.is_signed ? "signed'(" : "unsigned'(") +
-                          value.to_string() + ")")
+              &cType,
+              string(value.is_signed ? "signed'(" : "unsigned'(") +
+                  value.to_string() + ")")
        << ";" << endl;
 }
 

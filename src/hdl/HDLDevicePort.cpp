@@ -20,6 +20,20 @@ void HDLDevicePort::GenerateVHDL(ostream &vhdl, bool is_last) {
        << " " << type->GetVHDLType() << (is_last ? "" : ";") << endl;
 };
 
+void HDLDevicePort::GenerateVHDLWire(ostream &vhdl) {
+  if (connectedNet == nullptr)
+    return;
+  if (dir == PortDirection::Output) {
+    vhdl << "\t" << name << " <= "
+         << type->VHDLCastFrom(connectedNet->sigType, connectedNet->name) << ";"
+         << endl;
+  } else {
+    vhdl << "\t" << connectedNet->name
+         << " <= " << connectedNet->sigType->VHDLCastFrom(type, name) << ";"
+         << endl;
+  }
+}
+
 HDLDevicePort::~HDLDevicePort() {
   if (connectedNet != nullptr) {
     remove(connectedNet->connectedPorts.begin(),
