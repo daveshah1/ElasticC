@@ -437,6 +437,16 @@ vector<EvaluatorVariable *> StreamEvaluatorVariable::GetAllChildren() {
 vector<EvaluatorVariable *> StreamEvaluatorVariable::GetArrayChildren() {
   return streamWindow;
 }
+
+EvaluatorVariable *StreamEvaluatorVariable::GetChildByName(string name) {
+  if (name == "__wrval")
+    return written_value;
+  else if (name == "__wren")
+    return write_enable;
+  else
+    return EvaluatorVariable::GetChildByName(name);
+}
+
 void StreamEvaluatorVariable::HandlePush(Evaluator *genst, EvalObject *value) {
   genst->SetVariableValue(write_enable, new EvalConstant(BitConstant(1)));
   genst->SetVariableValue(written_value, value);
@@ -446,4 +456,4 @@ void StreamEvaluatorVariable::HandleWrite(Evaluator *genst, EvalObject *value) {
   throw eval_error("cannot assign to stream ===" + name +
                    "===, use operator<< instead");
 }
-}
+} // namespace RapidHLS

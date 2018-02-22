@@ -28,8 +28,6 @@ public:
   virtual void EvaluateBlock(Parser::HardwareBlock *block) = 0;
   virtual void EvaluateStatement(Parser::Statement *stmt) = 0;
   virtual EvalObject *EvaluateExpression(Parser::Expression *expr) = 0;
-  virtual EvalObject *EvaluateInitialiser(Parser::Expression *expr,
-                                          Parser::DataTypeSpecifier *type);
 
   virtual void SetVariableValue(EvaluatorVariable *var, EvalObject *value) = 0;
   virtual EvalObject *GetVariableValue(EvaluatorVariable *var) = 0;

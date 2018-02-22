@@ -549,6 +549,65 @@ void EvalBasicOperation::Synthesise(Evaluator *state, const SynthContext &sc,
       new HDLGen::OperationHDLDevice(type, operandSigs, outputNet));
 }
 
+EvalSpecialOperation::EvalSpecialOperation(SpecialOperationType _type,
+                                           vector<EvalObject *> _operands,
+                                           vector<BitConstant> _parameters)
+    : EvalObject(), type(_type), operands(_operands), parameters(_parameters){};
+
+string EvalSpecialOperation::GetID() {
+  return "special_op_" + to_string(base_id);
+}
+
+DataType *EvalSpecialOperation::GetDataType(Evaluator *state) {
+  switch (type) {
+  case SpecialOperationType::T_COND:
+    return operands.at(1)->GetDataType(state);
+  case SpecialOperationType::ARRAY_SEL:
+    return operands.at(0)->GetDataType(state);
+  case SpecialOperationType::ARRAY_WRITE:
+    return operands.at(1)->GetDataType(state);
+  default:
+    throw eval_error("unknown special operation");
+  }
+}
+
+bool EvalSpecialOperation::HasConstantValue(Evaluator *state) {
+  try {
+    GetScalarConstValue(state);
+    return true;
+  } catch (runtime_error &r) {
+    return false;
+  }
+}
+
+EvalObject *EvalSpecialOperation::GetConstantValue(Evaluator *state) {
+
+  vector<BitConstant> constOperands;
+  transform(operands.begin(), operands.end(), back_inserter(constOperands),
+            [state](EvalObject *o) { return o->GetScalarConstValue(state); });
+
+  switch (type) {
+  case SpecialOperationType::T_COND:
+    if (constOperands[0].intval() != 0)
+      return new EvalConstant(constOperands[1]);
+    else
+      return new EvalConstant(constOperands[2]);
+  case SpecialOperationType::ARRAY_SEL: {
+    int idx = constOperands.back().intval();
+    if (idx >= constOperands.size() - 1)
+      throw eval_error("array index out of bounds");
+    return new EvalConstant(constOperands.at(idx));
+  }
+  case SpecialOperationType::ARRAY_WRITE:
+    if (constOperands.at(2).intval() == parameters.at(0).intval())
+      return new EvalConstant(constOperands.at(1));
+    else
+      return new EvalConstant(constOperands.at(0));
+  default:
+    throw eval_error("unknown special operation");
+  }
+};
+
 EvalArrayAccess::EvalArrayAccess(EvalObject *_base, vector<EvalObject *> _index)
     : EvalObject(), base(_base), index(_index){};
 
@@ -624,6 +683,10 @@ EvalObject *EvalArrayAccess::GetValue(Evaluator *state) {
 
 EvalStructAccess::EvalStructAccess(EvalObject *_base, string _member)
     : EvalObject(), base(_base), member(_member){};
+
+string EvalStructAccess::GetID() {
+  return "struct_access_" + to_string(base_id);
+}
 
 DataType *EvalStructAccess::GetDataType(Evaluator *state) {
   return base->GetDataType(state)->GetMemberType(member);
@@ -764,4 +827,4 @@ EvalObject *EvalNull_class::GetValue(Evaluator *state) {
 
 EvalNull_class EvalNull_obj;
 EvalNull_class *EvalNull = &EvalNull_obj;
-}
+} // namespace RapidHLS

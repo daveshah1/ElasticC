@@ -63,6 +63,10 @@ BasicDataTypeSpecifier::BasicDataTypeSpecifier(BasicDataType _type,
   tempTParser.Parse(&tempParser, &tempScope);
 };
 
+vector<Templates::TemplateParameter *> &BasicDataTypeSpecifier::Params() {
+  return params;
+}
+
 DataType *BasicDataTypeSpecifier::Resolve(Evaluator *currentEval,
                                           TemplateParamContext *tpContext,
                                           EvalObject *value) {

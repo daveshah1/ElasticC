@@ -404,4 +404,4 @@ BitConstant ConstantParser::ParseConstexpr(Parser::Expression *expr) {
   return EvaluateExpression(expr)->GetConstantValue(this)->GetScalarConstValue(
       this);
 }
-}
+} // namespace RapidHLS

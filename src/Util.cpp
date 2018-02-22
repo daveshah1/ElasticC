@@ -112,7 +112,7 @@ void PrintBanner(string appname) {
   Console_SetForeColour(COLOUR_CYAN);
   cout << GetVersion() << endl;
   Console_ResetColour();
-  cout << "(C) 2016-17 David Shah" << endl;
+  cout << "Copyright (C) 2016-18 David Shah" << endl;
   cout << "This program is licensed under the MIT License and provided without "
           "warranty"
        << endl;
