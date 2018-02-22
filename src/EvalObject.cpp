@@ -608,6 +608,57 @@ EvalObject *EvalSpecialOperation::GetConstantValue(Evaluator *state) {
   }
 };
 
+EvalObject *EvalSpecialOperation::ApplyToState(Evaluator *state) {
+  vector<EvalObject *> operandValues;
+  transform(operands.begin(), operands.end(), back_inserter(operandValues),
+            [state](EvalObject *o) { return o->GetValue(state); });
+  return new EvalSpecialOperation(type, operandValues, parameters);
+}
+
+void EvalSpecialOperation::AssignValue(Evaluator *state, EvalObject *value) {
+  if (type == SpecialOperationType::ARRAY_SEL)
+    throw eval_error(
+        "assignment to array with non-constant index not yet implemented");
+  else
+    throw eval_error("unsupported use of assignment operator");
+}
+
+vector<EvalObject *> EvalSpecialOperation::GetOperands() { return operands; }
+
+EvalObject *EvalSpecialOperation::GetValue(Evaluator *state) {
+  return ApplyToState(state);
+}
+
+void EvalSpecialOperation::Synthesise(Evaluator *state, const SynthContext &sc,
+                                      HDLGen::HDLSignal *outputNet) {
+  vector<HDLGen::HDLSignal *> operandSigs;
+
+  transform(operands.begin(), operands.end(), back_inserter(operandSigs),
+            [sc, state](EvalObject *op) {
+              HDLGen::HDLSignal *res = sc.design->CreateTempSignal(
+                  op->GetDataType(state)->GetHDLType());
+              op->Synthesise(state, sc, res);
+              return res;
+            });
+
+  switch (type) {
+  case SpecialOperationType::T_COND:
+    sc.design->AddDevice(new HDLGen::MultiplexerHDLDevice(
+        vector<HDLGen::HDLSignal *>{operandSigs[2], operandSigs[1]},
+        operandSigs[0], outputNet));
+    break;
+  case SpecialOperationType::ARRAY_SEL:
+    sc.design->AddDevice(new HDLGen::MultiplexerHDLDevice(
+        vector<HDLGen::HDLSignal *>(operandSigs.begin(),
+                                    operandSigs.begin() + (operandSigs.size() - 1)),
+        operandSigs.back(), outputNet));
+    break;
+  case SpecialOperationType::ARRAY_WRITE: {
+    throw eval_error("array write synthesis NYI");
+  }
+  }
+}
+
 EvalArrayAccess::EvalArrayAccess(EvalObject *_base, vector<EvalObject *> _index)
     : EvalObject(), base(_base), index(_index){};
 

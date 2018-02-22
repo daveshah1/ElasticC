@@ -281,6 +281,11 @@ public:
   void AssignValue(Evaluator *state, EvalObject *value);
   vector<EvalObject *> GetOperands();
   EvalObject *GetValue(Evaluator *state);
+
+  void Synthesise(Evaluator *state, const SynthContext &sc,
+                  HDLGen::HDLSignal *outputNet);
+
+
   SpecialOperationType type;
 
 private:
