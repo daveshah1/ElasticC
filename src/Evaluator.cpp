@@ -6,7 +6,7 @@
 #include <algorithm>
 #include <iterator>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 Evaluator::Evaluator(Parser::GlobalScope *_gs) : gs(_gs) {
   tpContext = new TemplateParamContext();
   tpContext->pContext = gs;
@@ -416,4 +416,4 @@ BitConstant ConstantParser::ParseConstexpr(Parser::Expression *expr) {
   return EvaluateExpression(expr)->GetConstantValue(this)->GetScalarConstValue(
       this);
 }
-} // namespace RapidHLS
+} // namespace ElasticC

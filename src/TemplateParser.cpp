@@ -4,7 +4,7 @@
 #include <algorithm>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 namespace Parser {
 namespace Templates {
 

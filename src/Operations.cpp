@@ -2,7 +2,7 @@
 #include "BitConstant.hpp"
 #include <algorithm>
 #include <stdexcept>
-namespace RapidHLS {
+namespace ElasticC {
 int GetResultWidth(vector<int> inWidths, OperationType oper,
                    vector<BitConstant *> constants) {
   switch (oper) {

@@ -7,7 +7,7 @@
 #include <tuple>
 #include <vector>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 class Evaluator;
 namespace Parser {
 class DataTypeSpecifier;

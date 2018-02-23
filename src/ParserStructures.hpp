@@ -7,7 +7,7 @@
 #include "ParserStatements.hpp"
 #include <utility>
 #include <vector>
-namespace RapidHLS {
+namespace ElasticC {
 namespace Parser {
 
 class Variable;

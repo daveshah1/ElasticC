@@ -5,7 +5,7 @@
 #include <algorithm>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 namespace Parser {
 Variable *Context::FindVariable(string name) {
   // First look in the current context

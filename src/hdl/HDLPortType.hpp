@@ -2,7 +2,7 @@
 #include <string>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 namespace HDLGen {
 
 class HDLPortType {

@@ -10,7 +10,7 @@
 #include <map>
 #include <string>
 #include <vector>
-namespace RapidHLS {
+namespace ElasticC {
 class Evaluator;
 class EvalConstant;
 class EvaluatorVariable;

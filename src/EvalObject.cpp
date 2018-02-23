@@ -9,7 +9,7 @@
 #include <iterator>
 #include <stdexcept>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 /* EvalObject base */
 EvalObject::EvalObject() { base_id = GetUniqueID(); };
 
@@ -878,4 +878,4 @@ EvalObject *EvalNull_class::GetValue(Evaluator *state) {
 
 EvalNull_class EvalNull_obj;
 EvalNull_class *EvalNull = &EvalNull_obj;
-} // namespace RapidHLS
+} // namespace ElasticC

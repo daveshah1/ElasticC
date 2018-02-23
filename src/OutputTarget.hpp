@@ -7,7 +7,7 @@
 #include <vector>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 class OutputTarget {
 public:
   // General exposed interface

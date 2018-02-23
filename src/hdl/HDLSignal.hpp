@@ -8,7 +8,7 @@
 #include <vector>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 namespace HDLGen {
 struct ClockInfo {
 public:

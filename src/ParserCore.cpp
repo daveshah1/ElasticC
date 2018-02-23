@@ -1,6 +1,6 @@
 #include "ParserCore.hpp"
 #include "Util.hpp"
-namespace RapidHLS {
+namespace ElasticC {
 ParserState::ParserState(string _code) { code = _code; }
 
 void ParserState::Skip() {

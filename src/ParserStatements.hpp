@@ -4,7 +4,7 @@
 #include "DataTypes.hpp"
 #include "Operations.hpp"
 #include <vector>
-namespace RapidHLS {
+namespace ElasticC {
 namespace Parser {
 
 namespace Templates {

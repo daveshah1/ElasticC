@@ -2,7 +2,7 @@
 #include <string>
 #include <vector>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 // This provides the core for the parser, a class that wraps around a string
 // and allows token fetching, whitespace and comment skipping, etc
 class ParserState {

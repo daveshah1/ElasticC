@@ -3,9 +3,9 @@ obj = $(src:.cpp=.o)
 
 CXXFLAGS = -std=c++14 -g -O3 -Isrc/
 LDFLAGS =  -lboost_system -lboost_filesystem
-all: rapidhls
+all: elasticc
 
-rapidhls: $(obj)
+elasticc: $(obj)
 	$(CXX) -o $@ $^ $(LDFLAGS)
 
 src/version.cpp:
@@ -13,4 +13,4 @@ src/version.cpp:
 
 .PHONY: clean version.cpp
 clean:
-	rm -f $(obj) rapidhls
+	rm -f $(obj) elasticc

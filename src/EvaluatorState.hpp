@@ -9,7 +9,7 @@
 #include <stack>
 #include <string>
 #include <vector>
-namespace RapidHLS {
+namespace ElasticC {
 
 class EvalObject;
 class EvaluatorVariable;

@@ -4,7 +4,7 @@
 #include <map>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 class EvaluatorVariable;
 // This is used to store clock signal info, etc, when synthesising EvalObjects
 struct SynthContext {

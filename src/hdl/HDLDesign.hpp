@@ -5,7 +5,7 @@
 #include <string>
 #include <vector>
 
-namespace RapidHLS {
+namespace ElasticC {
 namespace HDLGen {
 
 // Represents the top level of an entity

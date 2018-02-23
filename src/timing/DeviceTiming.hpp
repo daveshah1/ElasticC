@@ -1,7 +1,7 @@
 #pragma once
 #include "Operations.hpp"
 // Provides a generic interface for devices to calculate timings
-namespace RapidHLS {
+namespace ElasticC {
 class DeviceTiming {
 public:
   double GetFFSetupTime();

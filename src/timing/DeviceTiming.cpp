@@ -1,6 +1,6 @@
 #include "DeviceTiming.hpp"
 
-namespace RapidHLS {
+namespace ElasticC {
 
 // Default delay values for testing
 double DeviceTiming::GetFFSetupTime() { return 0.1e-9; }
@@ -10,4 +10,4 @@ double DeviceTiming::GetOperationDelay(OperationType ot,
   return 1e-9;
 }
 
-}; // namespace RapidHLS
+}; // namespace ElasticC

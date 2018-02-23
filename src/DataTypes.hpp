@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 
 /*
 The generic interface for definable data types

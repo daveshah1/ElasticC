@@ -3,7 +3,7 @@
 #include <algorithm>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 namespace Parser {
 vector<Variable *> Statement::GetVariableDeclarations() {
   // default is no variables declared by statement

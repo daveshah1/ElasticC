@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <cmath>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 namespace HDLGen {
 
 double ClockInfo::GetRisingEdgePos() {

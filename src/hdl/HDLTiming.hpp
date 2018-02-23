@@ -3,7 +3,7 @@
 #include <vector>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 namespace HDLGen {
 /*
 This class provides a generic interface for timing delay values. It is used to

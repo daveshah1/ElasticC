@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 enum MessageLevel { MSG_DEBUG = 0, MSG_NOTE, MSG_WARNING, MSG_ERROR };
 
 enum ConsoleColour {
@@ -38,7 +38,7 @@ string FindFile(vector<string> filenames, string envVar,
 int GetUniqueID();
 
 namespace EnvironmentVars {
-const string rhls_incdir = "RAPIDHLS_INCDR";
+const string ecc_incdir = "ELASTICC_INCDR";
 }
 
 // Read an environment variable, adding extracted paths (expected to be
@@ -48,7 +48,7 @@ void ParseEnvironmentVar(string var, vector<string> &paths);
 string GetVersion();
 
 extern MessageLevel verbosity;
-extern const string rhls_version;
+extern const string ecc_version;
 
 // Return the number of bits needed to represent n values (used to determine
 // address bus size)

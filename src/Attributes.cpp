@@ -4,7 +4,7 @@
 #include <stdexcept>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 
 AttributeSet::AttributeSet(){};
 

@@ -8,7 +8,7 @@
 #include <string>
 #include <vector>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 
 VariableDir::VariableDir(bool _input, bool _output, bool _toplvl)
     : is_input(_input), is_output(_output), is_toplevel(_toplvl){};
@@ -456,4 +456,4 @@ void StreamEvaluatorVariable::HandleWrite(Evaluator *genst, EvalObject *value) {
   throw eval_error("cannot assign to stream ===" + name +
                    "===, use operator<< instead");
 }
-} // namespace RapidHLS
+} // namespace ElasticC

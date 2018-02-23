@@ -5,7 +5,7 @@
 #include <vector>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 class DataType;
 class Evaluator;
 class EvalObject;

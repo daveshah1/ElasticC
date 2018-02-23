@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 /*
 This allows C++-style attributes to be specified,
 in the form

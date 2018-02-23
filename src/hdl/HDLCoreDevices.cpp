@@ -5,7 +5,7 @@
 #include <algorithm>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 namespace HDLGen {
 OperationHDLDevice::OperationHDLDevice(OperationType _oper,
                                        const vector<HDLSignal *> &inputs,
@@ -402,4 +402,4 @@ MultiplexerHDLDevice::~MultiplexerHDLDevice() {
 int MultiplexerHDLDevice::serial = 0;
 
 } // namespace HDLGen
-} // namespace RapidHLS
+} // namespace ElasticC

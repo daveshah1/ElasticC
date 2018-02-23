@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 class BitConstant;
 enum OperationType {
   B_ADD, // arithmetic

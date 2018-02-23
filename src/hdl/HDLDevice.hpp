@@ -4,7 +4,7 @@
 #include <string>
 #include <vector>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 namespace HDLGen {
 class HDLDevicePort;
 class HDLSignal;

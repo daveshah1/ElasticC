@@ -2,7 +2,7 @@
 #include "HDLSignal.hpp"
 #include <algorithm>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 namespace HDLGen {
 
 HDLDevicePort::HDLDevicePort(string _name, HDLDevice *_dev, HDLPortType *_type,

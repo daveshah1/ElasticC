@@ -1,7 +1,7 @@
 #include "HDLDevice.hpp"
 #include <algorithm>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 namespace HDLGen {
 
 vector<string> HDLDevice::GetVHDLDeps() { return vector<string>{}; };

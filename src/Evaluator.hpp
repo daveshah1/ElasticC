@@ -9,7 +9,7 @@
 #include <utility>
 #include <vector>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 // This evaluates the parsed source into something that can be converted to
 // hardware (typically this process consists of timing analysis, pipelining if
 // needed and code [VHDL/POLYMER] generation)

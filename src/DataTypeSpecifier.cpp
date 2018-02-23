@@ -7,7 +7,7 @@
 #include <iterator>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 namespace Parser {
 vector<Templates::TemplateParameter *> &DataTypeSpecifier::Params() {
   return _params;

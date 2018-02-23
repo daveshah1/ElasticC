@@ -4,7 +4,7 @@
 #include "Operations.hpp"
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 namespace HDLGen {
 // A device which performs an operation such as arithmetic, comparison or logic
 class OperationHDLDevice : public HDLDevice {

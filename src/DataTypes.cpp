@@ -5,7 +5,7 @@
 #include <vector>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 
 DataType *DataType::GetBaseType() {
   throw runtime_error(GetName() + " has no base type");

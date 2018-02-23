@@ -2,7 +2,7 @@
 #include <algorithm>
 #include <sstream>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 namespace HDLGen {
 
 bool HDLPortType::IsSigned() const { return false; }
@@ -100,4 +100,4 @@ string NumericPortType::GetZero() const {
   return string(is_signed ? "signed'(" : "unsigned'(") + zeros(width) + ")";
 };
 } // namespace HDLGen
-} // namespace RapidHLS
+} // namespace ElasticC

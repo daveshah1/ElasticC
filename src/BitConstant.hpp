@@ -3,7 +3,7 @@
 #include <string>
 #include <vector>
 using namespace std;
-namespace RapidHLS {
+namespace ElasticC {
 /*
 This is intended to store the value of an arbitrary length constant
 */

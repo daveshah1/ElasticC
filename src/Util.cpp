@@ -5,7 +5,7 @@
 #include <cstdlib>
 #include <iomanip>
 #include <iostream>
-namespace RapidHLS {
+namespace ElasticC {
 /*
 If you are using a terminal that does not support VT100 control codes, you will
 need to
@@ -14,7 +14,7 @@ define BORING_MODE
 
 MessageLevel verbosity = MSG_NOTE;
 
-string GetVersion() { return rhls_version; }
+string GetVersion() { return ecc_version; }
 
 void Console_SetForeColour(ConsoleColour clr) {
 #ifndef BORING_MODE

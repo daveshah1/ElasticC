@@ -12,7 +12,7 @@
 #include <string>
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 namespace Parser {
 RCCParser::RCCParser(ParserState &_code, GlobalScope &_gs)
     : code(_code), gs(_gs) {
@@ -139,7 +139,7 @@ void RCCParser::IncludeFile(string fileName, bool systemOnly, bool quiet) {
   }
   ParserState &originalCode = code;
   string fullPath =
-      FindFile(fileName, EnvironmentVars::rhls_incdir, !systemOnly);
+      FindFile(fileName, EnvironmentVars::ecc_incdir, !systemOnly);
   if (fullPath == "")
     throw parse_error("included file ===" + fileName + "=== not found");
   ifstream ins(fullPath);

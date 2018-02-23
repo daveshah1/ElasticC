@@ -6,7 +6,7 @@
 
 using namespace std;
 
-namespace RapidHLS {
+namespace ElasticC {
 namespace HDLGen {
 class HDLSignal;
 class HDLDevice;
