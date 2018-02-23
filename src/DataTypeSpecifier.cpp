@@ -58,7 +58,7 @@ BasicDataTypeSpecifier::BasicDataTypeSpecifier(BasicDataType _type,
   // just use a temporary parser to parse them from the string
   ParserState tempCode(strParams);
   GlobalScope tempScope;
-  RCCParser tempParser(tempCode, tempScope);
+  ECCParser tempParser(tempCode, tempScope);
   Templates::TemplateParser tempTParser(params);
   tempTParser.Parse(&tempParser, &tempScope);
 };

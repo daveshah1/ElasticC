@@ -1,4 +1,4 @@
-#include "RCCParser.hpp"
+#include "ECCParser.hpp"
 #include "DataTypes.hpp"
 #include "Evaluator.hpp"
 #include "TemplateParser.hpp"
@@ -14,7 +14,7 @@ using namespace std;
 
 namespace ElasticC {
 namespace Parser {
-RCCParser::RCCParser(ParserState &_code, GlobalScope &_gs)
+ECCParser::ECCParser(ParserState &_code, GlobalScope &_gs)
     : code(_code), gs(_gs) {
   // build the lists of tokens
   transform(unaryPrefixOperations.begin(), unaryPrefixOperations.end(),
@@ -39,7 +39,7 @@ RCCParser::RCCParser(ParserState &_code, GlobalScope &_gs)
   IncludeFile("rapidcore.rch", true, true);
 };
 
-void RCCParser::ParseAll() {
+void ECCParser::ParseAll() {
   try {
     code.Skip();
     vector<Templates::TemplateParameter *> templateParams;
@@ -101,7 +101,7 @@ void RCCParser::ParseAll() {
   }
 }
 
-void RCCParser::ParsePreprocessorDef() {
+void ECCParser::ParsePreprocessorDef() {
   if (!code.CheckMatchAndGet('#')) {
     throw parse_error("invalid preprocessor definition");
   }
@@ -132,7 +132,7 @@ void RCCParser::ParsePreprocessorDef() {
   }
 }
 
-void RCCParser::IncludeFile(string fileName, bool systemOnly, bool quiet) {
+void ECCParser::IncludeFile(string fileName, bool systemOnly, bool quiet) {
   MessageLevel old_verbosity = verbosity;
   if (quiet) {
     verbosity = MSG_ERROR;
@@ -157,7 +157,7 @@ void RCCParser::IncludeFile(string fileName, bool systemOnly, bool quiet) {
   verbosity = old_verbosity;
 }
 
-void RCCParser::ParseStructureDefinition(
+void ECCParser::ParseStructureDefinition(
     const AttributeSet &currentAttr,
     vector<Templates::TemplateParameter *> templ) {
   if (code.GetNextIdentOrLiteral() != "struct") {
@@ -192,7 +192,7 @@ void RCCParser::ParseStructureDefinition(
   gs.structures.push_back(strt);
 };
 
-void RCCParser::ParseFunction(const AttributeSet &currentAttr,
+void ECCParser::ParseFunction(const AttributeSet &currentAttr,
                               vector<Templates::TemplateParameter *> templ) {
   Function *func = new Function();
   func->parentContext = &gs;
@@ -220,7 +220,7 @@ void RCCParser::ParseFunction(const AttributeSet &currentAttr,
   gs.functions.push_back(func);
 }
 
-AttributeSet RCCParser::ParseAttributes() {
+AttributeSet ECCParser::ParseAttributes() {
   AttributeSet as;
   code.Skip();
   while ((!code.AtEnd()) && (code.PeekNext(2) == "[[")) {
@@ -236,7 +236,7 @@ AttributeSet RCCParser::ParseAttributes() {
   return as;
 }
 
-Statement *RCCParser::ParseStatement(Context *ctx) {
+Statement *ECCParser::ParseStatement(Context *ctx) {
   code.Skip();
   AttributeSet attr = ParseAttributes();
   Statement *result = NullStatement;
@@ -338,7 +338,7 @@ Statement *RCCParser::ParseStatement(Context *ctx) {
   return result;
 }
 
-Block *RCCParser::ParseBlockContent(Context *ctx) {
+Block *ECCParser::ParseBlockContent(Context *ctx) {
   Block *block = new Block();
   block->parentContext = ctx;
   block->codeLine = code.GetLine();
@@ -350,7 +350,7 @@ Block *RCCParser::ParseBlockContent(Context *ctx) {
   return block;
 }
 
-bool RCCParser::IsDataTypeKeyword(string keyword) {
+bool ECCParser::IsDataTypeKeyword(string keyword) {
   vector<string> basicDataTypes = {"auto",   "unsigned", "signed", "ram", "rom",
                                    "stream", "stream2d", "fifo",   "void"};
   if (find(basicDataTypes.begin(), basicDataTypes.end(), keyword) !=
@@ -367,7 +367,7 @@ bool RCCParser::IsDataTypeKeyword(string keyword) {
   }
 }
 
-DataTypeSpecifier *RCCParser::ParseDataType(Context *ctx) {
+DataTypeSpecifier *ECCParser::ParseDataType(Context *ctx) {
   code.Skip();
   string typeName = code.GetNextIdentOrLiteral(true);
   DataTypeSpecifier *baseType;
@@ -403,7 +403,7 @@ DataTypeSpecifier *RCCParser::ParseDataType(Context *ctx) {
 };
 
 vector<Templates::TemplateParameter *>
-RCCParser::ParseTemplateDefinition(Context *ctx) {
+ECCParser::ParseTemplateDefinition(Context *ctx) {
   code.Skip();
   vector<Templates::TemplateParameter *> params;
   if (code.PeekNextIdentOrLiteral() == "template") {
@@ -440,7 +440,7 @@ RCCParser::ParseTemplateDefinition(Context *ctx) {
   return params;
 }
 
-DataTypeSpecifier *RCCParser::HandleArraySpecifier(DataTypeSpecifier *baseType,
+DataTypeSpecifier *ECCParser::HandleArraySpecifier(DataTypeSpecifier *baseType,
                                                    Context *ctx) {
   DataTypeSpecifier *withArray = baseType;
   code.Skip();
@@ -457,7 +457,7 @@ DataTypeSpecifier *RCCParser::HandleArraySpecifier(DataTypeSpecifier *baseType,
   return withArray;
 }
 
-VariableDeclaration *RCCParser::ParseVariableDeclaration(
+VariableDeclaration *ECCParser::ParseVariableDeclaration(
     Context *ctx, const AttributeSet &currentAttr, bool &isRef, bool oneOnly) {
   vector<Variable *> variables;
   vector<VariableQualifier> qualifiers;
@@ -509,7 +509,7 @@ VariableDeclaration *RCCParser::ParseVariableDeclaration(
   return new VariableDeclaration(variables, currentAttr);
 }
 
-vector<pair<Variable *, bool>> RCCParser::ParseArgumentList(
+vector<pair<Variable *, bool>> ECCParser::ParseArgumentList(
     Context *ctx,
     map<string, vector<Templates::TemplateParameter *>> &specialParams,
     map<string, bool> &specialParamFound) {
@@ -550,14 +550,14 @@ vector<pair<Variable *, bool>> RCCParser::ParseArgumentList(
   return args;
 }
 
-RCCParser::OperationStackItem::OperationStackItem(OpStackItemType _type)
+ECCParser::OperationStackItem::OperationStackItem(OpStackItemType _type)
     : type(_type){};
 
-RCCParser::OperationStackItem::OperationStackItem(OpStackItemType _type,
+ECCParser::OperationStackItem::OperationStackItem(OpStackItemType _type,
                                                   OperationType _oper)
     : type(_type), oper(_oper){};
 
-void RCCParser::ApplyFromOpStack(stack<OperationStackItem> &opStack,
+void ECCParser::ApplyFromOpStack(stack<OperationStackItem> &opStack,
                                  stack<Expression *> &parseStack) {
   if (opStack.empty()) {
     throw parse_error("invalid expression (operation stack underflow)");
@@ -578,7 +578,7 @@ void RCCParser::ApplyFromOpStack(stack<OperationStackItem> &opStack,
   }
 };
 
-Expression *RCCParser::ParseExpression(vector<char> terminators, Context *ctx) {
+Expression *ECCParser::ParseExpression(vector<char> terminators, Context *ctx) {
   /*As before we use a modified shunting yard algorithm. It is modified to
    * improve function support, and support more operation types (unary minus,
    * etc)*/
@@ -748,7 +748,7 @@ Expression *RCCParser::ParseExpression(vector<char> terminators, Context *ctx) {
   }
 };
 
-vector<Expression *> RCCParser::ParseExpressionList(Context *ctx, char term) {
+vector<Expression *> ECCParser::ParseExpressionList(Context *ctx, char term) {
   vector<Expression *> exprlist;
   if (code.PeekNext() == term)
     return exprlist;
@@ -759,7 +759,7 @@ vector<Expression *> RCCParser::ParseExpressionList(Context *ctx, char term) {
   return exprlist;
 }
 
-Expression *RCCParser::ParseVarExpression(Context *ctx) {
+Expression *ECCParser::ParseVarExpression(Context *ctx) {
   string variableName = code.GetNextIdentOrLiteral();
   Expression *expr;
   if (ctx->IsTemplateParameter(variableName)) {
@@ -787,12 +787,12 @@ Expression *RCCParser::ParseVarExpression(Context *ctx) {
   return expr;
 };
 
-bool RCCParser::IsFunction(string token) {
+bool ECCParser::IsFunction(string token) {
   return any_of(gs.functions.begin(), gs.functions.end(),
                 [token](Function *f) { return f->name == token; });
 }
 
-void RCCParser::ParseHWBlock(const AttributeSet &currentAttr) {
+void ECCParser::ParseHWBlock(const AttributeSet &currentAttr) {
   HardwareBlock *hwBlock = new HardwareBlock();
   hwBlock->parentContext = &gs;
   hwBlock->attributes = currentAttr;

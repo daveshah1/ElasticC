@@ -19,7 +19,7 @@ BitConstantParameter::BitConstantParameter(string _name,
                                            DataTypeSpecifier *_type)
     : TemplateParameter(_name), type(_type){};
 
-void BitConstantParameter::Parse(RCCParser *parser, Context *ctx) {
+void BitConstantParameter::Parse(ECCParser *parser, Context *ctx) {
   expr = parser->ParseExpression(vector<char>{',', '>'}, ctx);
 }
 
@@ -51,7 +51,7 @@ TemplateParameter *IntParameter::Clone() const {
 
 StringParameter::StringParameter(string _name) : TemplateParameter(_name){};
 
-void StringParameter::Parse(RCCParser *parser, Context *ctx) {
+void StringParameter::Parse(ECCParser *parser, Context *ctx) {
   parser->code.Skip();
   value = parser->code.GetNextIdentOrLiteral(true);
 }
@@ -66,7 +66,7 @@ SelectorParameter::SelectorParameter(string _name,
                                      const vector<string> &_allowedValues)
     : TemplateParameter(_name), allowedValues(_allowedValues) {}
 
-void SelectorParameter::Parse(RCCParser *parser, Context *ctx) {
+void SelectorParameter::Parse(ECCParser *parser, Context *ctx) {
   parser->code.Skip();
   string stringval = parser->code.GetNextIdentOrLiteral(true);
   auto iter = find(allowedValues.begin(), allowedValues.end(), stringval);
@@ -90,7 +90,7 @@ TemplateParameter *SelectorParameter::Clone() const {
   return new SelectorParameter(name, allowedValues);
 }
 
-void DataTypeParameter::Parse(RCCParser *parser, Context *ctx) {
+void DataTypeParameter::Parse(ECCParser *parser, Context *ctx) {
   value = parser->ParseDataType(ctx);
 }
 
@@ -108,7 +108,7 @@ TemplateParser::TemplateParser(initializer_list<TemplateParameter *> _params)
 TemplateParser::TemplateParser(vector<TemplateParameter *> _params)
     : params(_params){};
 
-void TemplateParser::Parse(RCCParser *parser, Context *ctx) {
+void TemplateParser::Parse(ECCParser *parser, Context *ctx) {
   parser->code.Skip();
 
   if (!parser->code.CheckMatchAndGet('<')) {

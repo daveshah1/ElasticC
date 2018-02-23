@@ -1,6 +1,6 @@
 #include "ParserStructures.hpp"
 #include "ParserStatements.hpp"
-#include "RCCParser.hpp"
+#include "ECCParser.hpp"
 #include "TemplateParser.hpp"
 #include <algorithm>
 using namespace std;

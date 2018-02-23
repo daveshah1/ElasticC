@@ -16,9 +16,9 @@ class TemplateParameter;
 }
 
 // The ElasticC parser itself
-class RCCParser {
+class ECCParser {
 public:
-  RCCParser(ParserState &_code, GlobalScope &_gs);
+  ECCParser(ParserState &_code, GlobalScope &_gs);
   ParserState &code;
   GlobalScope &gs;
   // Parse the entire global scope

@@ -1,6 +1,6 @@
 #pragma once
 #include "DataTypes.hpp"
-#include "RCCParser.hpp"
+#include "ECCParser.hpp"
 #include <initializer_list>
 #include <sstream>
 #include <string>
@@ -16,7 +16,7 @@ class TemplateParameter {
 public:
   TemplateParameter(string _name);
   // Parse the parameter using the current parser
-  virtual void Parse(RCCParser *parser, Context *ctx) = 0;
+  virtual void Parse(ECCParser *parser, Context *ctx) = 0;
   // Create a clone of the parameter; however ignoring its current value
   virtual TemplateParameter *Clone() const = 0;
 
@@ -28,7 +28,7 @@ class BitConstantParameter : public TemplateParameter {
 public:
   BitConstantParameter(string _name);
   BitConstantParameter(string _name, DataTypeSpecifier *_type);
-  void Parse(RCCParser *parser, Context *ctx);
+  void Parse(ECCParser *parser, Context *ctx);
   BitConstant GetValue(Evaluator *eval);
   virtual TemplateParameter *Clone() const;
 
@@ -47,7 +47,7 @@ public:
 class StringParameter : public TemplateParameter {
 public:
   StringParameter(string _name);
-  void Parse(RCCParser *parser, Context *ctx);
+  void Parse(ECCParser *parser, Context *ctx);
   string GetValue();
   TemplateParameter *Clone() const;
 
@@ -58,7 +58,7 @@ private:
 class SelectorParameter : public TemplateParameter {
 public:
   SelectorParameter(string _name, const vector<string> &_allowedValues);
-  void Parse(RCCParser *parser, Context *ctx);
+  void Parse(ECCParser *parser, Context *ctx);
   string GetValue();
   int GetIndex();
   TemplateParameter *Clone() const;
@@ -71,7 +71,7 @@ private:
 class DataTypeParameter : public TemplateParameter {
 public:
   DataTypeParameter(string _name);
-  void Parse(RCCParser *parser, Context *ctx);
+  void Parse(ECCParser *parser, Context *ctx);
   DataTypeSpecifier *GetValue();
   TemplateParameter *Clone() const;
 
@@ -84,7 +84,7 @@ public:
   TemplateParser(vector<TemplateParameter *> _params);
   TemplateParser(initializer_list<TemplateParameter *> _params);
 
-  void Parse(RCCParser *parser, Context *ctx);
+  void Parse(ECCParser *parser, Context *ctx);
 
 private:
   vector<TemplateParameter *> params;
