@@ -114,8 +114,8 @@ void PrintBanner(string appname) {
   Console_ResetColour();
   cout << "Copyright (C) 2016-18 David Shah" << endl;
   cout << "This program is licensed under the MIT License and provided without "
-          "warranty"
-       << endl;
+          "warranty. Refer to the COPYING file for further information."
+       << endl << endl;
 }
 
 string FindFile(string filename, string envVar, bool includeCwd) {

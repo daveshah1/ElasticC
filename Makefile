@@ -2,7 +2,7 @@ src = $(wildcard src/*.cpp) $(wildcard src/hdl/*.cpp) $(wildcard src/timing/*.cp
 obj = $(src:.cpp=.o)
 
 CXXFLAGS = -std=c++14 -g -O3 -Isrc/
-LDFLAGS =  -lboost_system -lboost_filesystem
+LDFLAGS =  -lboost_system -lboost_filesystem -lboost_filesystem -lboost_program_options
 all: elasticc
 
 elasticc: $(obj)
@@ -11,6 +11,6 @@ elasticc: $(obj)
 src/version.cpp:
 	src/update_version.sh
 
-.PHONY: clean version.cpp
+.PHONY: clean src/version.cpp
 clean:
 	rm -f $(obj) elasticc
