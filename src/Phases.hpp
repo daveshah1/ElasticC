@@ -19,10 +19,10 @@ Parser::GlobalScope *DoParse(ParserState &code);
 EvaluatedBlock EvaluateCode(Evaluator *eval, Parser::HardwareBlock *top);
 
 // Optimise the evaluated block
-void OptimiseBlock(EvaluatedBlock *block, SynthContext &sc);
+void OptimiseBlock(EvaluatedBlock *block);
 
 // Convert the optimised block to a HDL style netlist
-HDLGen::HDLDesign *MakeHDLDesign(EvaluatedBlock *block, SynthContext &sc);
+SynthContext MakeHDLDesign(Parser::HardwareBlock *top, EvaluatedBlock *block);
 
 // Insert pipeline registers as needed in the HDL netlist
 void PipelineHDLDesign(HDLGen::HDLDesign *hdld, SynthContext &sc);

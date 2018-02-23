@@ -812,8 +812,8 @@ void ECCParser::ParseHWBlock(const AttributeSet &currentAttr) {
   map<string, bool> specialInputsFound;
   Templates::IntParameter clockFreq("frequency");
   specialInputs["clock"] = {&clockFreq};
-  specialInputs["cken"] = {};
-  specialInputs["den"] = {};
+  specialInputs["clken"] = {};
+  specialInputs["input_valid"] = {};
   specialInputs["reset"] = {};
   vector<pair<Variable *, bool>> inputList =
       ParseArgumentList(hwBlock, specialInputs, specialInputsFound);
@@ -830,9 +830,9 @@ void ECCParser::ParseHWBlock(const AttributeSet &currentAttr) {
   SingleCycleEvaluator tempEval(&gs);
   if (clockFreq.wasSpecified)
     hwBlock->params.clock_freq = clockFreq.GetValue(&tempEval);
-  if (specialInputsFound["cken"])
+  if (specialInputsFound["clken"])
     hwBlock->params.has_cken = true;
-  if (specialInputsFound["den"])
+  if (specialInputsFound["input_valid"])
     hwBlock->params.has_den = true;
   if (specialInputsFound["reset"])
     hwBlock->params.has_sync_rst = true;
@@ -843,7 +843,7 @@ void ECCParser::ParseHWBlock(const AttributeSet &currentAttr) {
   code.Skip();
 
   map<string, vector<Templates::TemplateParameter *>> specialOutputs = {
-      {"den_out", {}}};
+      {"output_valid", {}}};
   map<string, bool> specialOutputsFound;
 
   vector<pair<Variable *, bool>> outputList =
@@ -856,7 +856,7 @@ void ECCParser::ParseHWBlock(const AttributeSet &currentAttr) {
                        code.GetLine());
         return x.first;
       });
-  if (specialOutputsFound["den_out"])
+  if (specialOutputsFound["output_valid"])
     hwBlock->params.has_den_out = true;
 
   hwBlock->body = ParseStatement(hwBlock);

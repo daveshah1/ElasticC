@@ -1,6 +1,8 @@
 #pragma once
 #include "HDLDevice.hpp"
 #include "HDLSignal.hpp"
+#include "HDLDevicePort.hpp"
+
 #include <iostream>
 #include <string>
 #include <vector>
@@ -19,6 +21,9 @@ public:
   vector<HDLDevice *> devices;
 
   void AddSignal(HDLSignal *sig);
+  void AddPort(HDLDevicePort *port);
+  void AddPortFromSig(HDLSignal *sig, PortDirection dir);
+
   HDLSignal *CreateTempSignal(HDLPortType *type, string prefix = "temp");
   void AddDevice(HDLDevice *dev);
 

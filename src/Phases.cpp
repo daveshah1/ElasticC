@@ -7,7 +7,7 @@ namespace ElasticC {
 ParserState LoadCode(string file) {
   ifstream ifs(file);
   if (!ifs)
-    PrintMessage(MSG_ERROR, "failed to open input file " + file);
+    PrintMessage(MSG_ERROR, "failed to open input file ===" + file + "===");
   string str((std::istreambuf_iterator<char>(ifs)),
              std::istreambuf_iterator<char>());
 	PrintMessage(MSG_DEBUG, "loaded input file " + file);
@@ -22,8 +22,18 @@ Parser::GlobalScope *DoParse(ParserState &code) {
 }
 
 EvaluatedBlock EvaluateCode(Evaluator *eval, Parser::HardwareBlock *top) {
+	PrintMessage(MSG_NOTE, "evaluating block ===" + top->name + "===");
   eval->EvaluateBlock(top);
   return eval->GetEvaluatedBlock();
 }
+
+void OptimiseBlock(EvaluatedBlock *block) {
+	// TODO
+}
+
+SynthContext MakeHDLDesign(Parser::HardwareBlock *top, EvaluatedBlock *block) {
+  return MakeSynthContext(top, block);
+}
+
 
 }; // namespace ElasticC
