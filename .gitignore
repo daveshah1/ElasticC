@@ -1,4 +1,4 @@
 *.o
 src/version.cpp
-/elasticc
+bin/elasticc
 *.exe

@@ -6,16 +6,30 @@
 #include "ParserCore.hpp"
 #include <iostream>
 #include <cstdlib>
-#include <unistd.h>
 #include <boost/program_options.hpp>
 using namespace std;
 using namespace ElasticC;
 
 using namespace boost::program_options;
 
-int main(int argc, char const *argv[]) {
-	PrintBanner("Elastic-C");
+ParserState LoadCode(string file) {
+	ifstream ifs(file);
+	string str((std::istreambuf_iterator<char>(ifs)),
+	                 std::istreambuf_iterator<char>());
+	return ParserState(str);
+};
 
+Parser::GlobalScope *DoParse(ParserState &code) {
+	Parser::GlobalScope *gs = new Parser::GlobalScope();
+	Parser::ECCParser(code, *gs).ParseAll();
+	return gs;
+}
+
+int main(int argc, char const *argv[]) {
+	exec_path = string(argv[0]);
+
+	PrintBanner("Elastic-C");
+	variables_map vm;
 	try
   {
     options_description desc{"Allowed Options"};
@@ -30,7 +44,6 @@ int main(int argc, char const *argv[]) {
 		pdesc.add("input", -1);
 
 
-    variables_map vm;
     store(command_line_parser(argc, argv).
           options(desc).positional(pdesc).run(), vm);
     notify(vm);
@@ -51,5 +64,17 @@ int main(int argc, char const *argv[]) {
 		return 2;
   }
 
+	if(vm.count("verbose"))
+		verbosity = MSG_DEBUG;
+	else if(vm.count("quiet"))
+		verbosity = MSG_WARNING;
+
+	ParserState ps = LoadCode(vm.at("input").as<string>());
+	Parser::GlobalScope *gs;
+	try {
+		gs = DoParse(ps);
+	} catch (Parser::parse_error &e) {
+		PrintMessage(MSG_ERROR, "Parse Error: " + string(e.what()), ps.GetLine());
+	}
 	return 0;
 }

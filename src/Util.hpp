@@ -47,6 +47,7 @@ void ParseEnvironmentVar(string var, vector<string> &paths);
 
 string GetVersion();
 
+extern string exec_path;
 extern MessageLevel verbosity;
 extern const string ecc_version;
 

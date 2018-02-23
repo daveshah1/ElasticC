@@ -13,6 +13,7 @@ define BORING_MODE
 */
 
 MessageLevel verbosity = MSG_NOTE;
+string exec_path;
 
 string GetVersion() { return ecc_version; }
 
@@ -108,12 +109,12 @@ void PrintMessage(MessageLevel level, string message, int line) {
 }
 
 void PrintBanner(string appname) {
-  cout << appname << " version ";
+  cerr << appname << " version ";
   Console_SetForeColour(COLOUR_CYAN);
-  cout << GetVersion() << endl;
+  cerr << GetVersion() << endl;
   Console_ResetColour();
-  cout << "Copyright (C) 2016-18 David Shah" << endl;
-  cout << "This program is licensed under the MIT License and provided without "
+  cerr << "Copyright (C) 2016-18 David Shah" << endl;
+  cerr << "This program is licensed under the MIT License and provided without "
           "warranty. Refer to the COPYING file for further information."
        << endl << endl;
 }
@@ -132,6 +133,7 @@ string FindFile(vector<string> filenames, string envVar, bool includeCwd) {
   for (auto incdir : includeDirStrs) {
     basePaths.push_back(fs::path(incdir));
   }
+  basePaths.push_back(fs::system_complete(exec_path).parent_path().parent_path() / "share" / "elasticc");
   for (auto base : basePaths) {
     for (auto file : filenames) {
       if (fs::exists(base / file)) {

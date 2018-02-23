@@ -36,7 +36,7 @@ ECCParser::ECCParser(ParserState &_code, GlobalScope &_gs)
             back_inserter(binaryAndPostfixOperTypes),
             [](const Operation &o) { return o.type; });
   // initialise core types, etc
-  IncludeFile("rapidcore.rch", true, true);
+  IncludeFile("elasticcore.ech", true, true);
 };
 
 void ECCParser::ParseAll() {
