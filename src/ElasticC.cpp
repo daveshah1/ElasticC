@@ -1,9 +1,7 @@
 #include "ECCParser.hpp"
 #include "Util.hpp"
-#include "Evaluator.hpp"
-#include "hdl/HDLDesign.hpp"
-#include "hdl/HDLDevice.hpp"
-#include "ParserCore.hpp"
+#include "Phases.hpp"
+
 #include <iostream>
 #include <cstdlib>
 #include <boost/program_options.hpp>
@@ -11,19 +9,6 @@ using namespace std;
 using namespace ElasticC;
 
 using namespace boost::program_options;
-
-ParserState LoadCode(string file) {
-	ifstream ifs(file);
-	string str((std::istreambuf_iterator<char>(ifs)),
-	                 std::istreambuf_iterator<char>());
-	return ParserState(str);
-};
-
-Parser::GlobalScope *DoParse(ParserState &code) {
-	Parser::GlobalScope *gs = new Parser::GlobalScope();
-	Parser::ECCParser(code, *gs).ParseAll();
-	return gs;
-}
 
 int main(int argc, char const *argv[]) {
 	exec_path = string(argv[0]);
@@ -76,5 +61,6 @@ int main(int argc, char const *argv[]) {
 	} catch (Parser::parse_error &e) {
 		PrintMessage(MSG_ERROR, "Parse Error: " + string(e.what()), ps.GetLine());
 	}
+
 	return 0;
 }

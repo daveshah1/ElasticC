@@ -80,7 +80,9 @@ void ECCParser::ParseAll() {
       } else if (IsDataTypeKeyword(code.PeekNextIdentOrLiteral())) {
         ParseFunction(attr, templateParams);
         templateParams.clear();
-
+      } else if (code.PeekNext() == ';') {
+        code.GetNext();
+        templateParams.clear();
       } else {
         // try and print the most friendly error possible
         if (code.PeekNextIdentOrLiteral() != "") {
@@ -137,7 +139,7 @@ void ECCParser::IncludeFile(string fileName, bool systemOnly, bool quiet) {
   if (quiet) {
     verbosity = MSG_ERROR;
   }
-  ParserState &originalCode = code;
+  ParserState originalCode = code;
   string fullPath =
       FindFile(fileName, EnvironmentVars::ecc_incdir, !systemOnly);
   if (fullPath == "")
@@ -150,7 +152,8 @@ void ECCParser::IncludeFile(string fileName, bool systemOnly, bool quiet) {
                  code.GetLine());
   }
   ParserState hdCode(
-      string((istreambuf_iterator<char>(ins)), istreambuf_iterator<char>()));
+      string((istreambuf_iterator<char>(ins)), istreambuf_iterator<char>()),
+      fileName);
   code = hdCode;
   ParseAll();
   code = originalCode;
@@ -483,9 +486,9 @@ VariableDeclaration *ECCParser::ParseVariableDeclaration(
       throw parse_error(string("variable name cannot start with a number"));
     }
     if (ctx->DoesVariableExist(variableName)) {
-      PrintMessage(MSG_WARNING,
-                   "redefining variable ===" + variableName + "===",
-                   code.GetLine());
+      PrintMessage(
+          MSG_WARNING,
+          "redefining variable ===" + variableName + "===", code.GetLine());
     }
     code.Skip();
     // Handle arrays specified after the variable name
@@ -802,6 +805,7 @@ void ECCParser::ParseHWBlock(const AttributeSet &currentAttr) {
   if ((blockName.size() == 0) || (isdigit(blockName[0]))) {
     throw parse_error("invalid hardware block name");
   }
+  PrintMessage(MSG_DEBUG, "parsing block " + blockName, code.GetLine());
   code.Skip();
   hwBlock->name = blockName;
   map<string, vector<Templates::TemplateParameter *>> specialInputs;
@@ -858,5 +862,5 @@ void ECCParser::ParseHWBlock(const AttributeSet &currentAttr) {
   hwBlock->body = ParseStatement(hwBlock);
   gs.blocks.push_back(hwBlock);
 }
-}
-}
+} // namespace Parser
+} // namespace ElasticC

@@ -7,7 +7,7 @@ namespace ElasticC {
 // and allows token fetching, whitespace and comment skipping, etc
 class ParserState {
 public:
-  ParserState(string _code);
+  ParserState(string _code, string _filename = "");
 
   // Skip whitespace and comments
   void Skip();
@@ -45,6 +45,7 @@ public:
   int GetLine();
 
   string code;
+  string filename;
   int pos = 0;
 };
 }

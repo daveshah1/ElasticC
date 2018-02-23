@@ -20,6 +20,13 @@ namespace ElasticC {
 
 class CallStackEntry;
 class TemplateParamContext;
+
+struct EvaluatedBlock {
+  // Really nothing more than a map of variables to variable values, in
+  // the single cycle case at least...
+  map<EvaluatorVariable *, EvalObject *> vars;
+};
+
 class Evaluator {
 public:
   Evaluator(Parser::GlobalScope *_gs);
@@ -47,6 +54,9 @@ public:
   virtual EvalObject *ProcessFunctionCall(
       Parser::Function *func, vector<EvalObject *> arguments,
       vector<Parser::Templates::TemplateParameter *> templateParams);
+
+  // Return the result of evaluation
+  virtual EvaluatedBlock GetEvaluatedBlock() = 0;
 
   virtual ~Evaluator();
 
@@ -98,6 +108,7 @@ public:
   virtual EvalObject *GetVariableValue(EvaluatorVariable *var);
   virtual void EvaluateStatement(Parser::Statement *stmt);
   virtual EvalObject *EvaluateExpression(Parser::Expression *expr);
+  virtual EvaluatedBlock GetEvaluatedBlock();
 
   virtual ~SingleCycleEvaluator();
 

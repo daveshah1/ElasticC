@@ -1,7 +1,10 @@
 #include "ParserCore.hpp"
 #include "Util.hpp"
 namespace ElasticC {
-ParserState::ParserState(string _code) { code = _code; }
+ParserState::ParserState(string _code, string _filename) {
+  code = _code;
+  filename = _filename;
+}
 
 void ParserState::Skip() {
   bool inComment = false;
@@ -147,4 +150,4 @@ int ParserState::GetLine() {
   }
   return line;
 }
-}
+} // namespace ElasticC

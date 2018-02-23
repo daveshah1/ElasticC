@@ -407,6 +407,10 @@ EvalObject *SingleCycleEvaluator::GetVariableValue(EvaluatorVariable *var) {
   return currentVariableValues.at(var);
 }
 
+EvaluatedBlock SingleCycleEvaluator::GetEvaluatedBlock() {
+  return EvaluatedBlock{currentVariableValues};
+}
+
 SingleCycleEvaluator::~SingleCycleEvaluator() {}
 
 ConstantParser::ConstantParser(Parser::GlobalScope *_gs)

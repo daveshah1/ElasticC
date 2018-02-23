@@ -19,7 +19,7 @@ class TemplateParameter;
 class ECCParser {
 public:
   ECCParser(ParserState &_code, GlobalScope &_gs);
-  ParserState &code;
+  ParserState code;
   GlobalScope &gs;
   // Parse the entire global scope
   void ParseAll();
