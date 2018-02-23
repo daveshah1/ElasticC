@@ -278,6 +278,14 @@ void SingleCycleEvaluator::EvaluateStatement(Parser::Statement *stmt) {
   }
 }
 
+void SingleCycleEvaluator::EvaluateBlock(Parser::HardwareBlock *block) {
+  for (auto inp : block->inputs)
+    Evaluator::AddVariable(inp, true, false);
+  for (auto op : block->outputs)
+    Evaluator::AddVariable(op, false, true);
+  EvaluateStatement(block->body);
+}
+
 EvalObject *SingleCycleEvaluator::EvaluateExpression(Parser::Expression *expr) {
   Parser::BasicOperation *bop;
   Parser::Literal *lit;
@@ -393,6 +401,10 @@ SingleCycleEvaluator::FindFirstNotMatchingConds(EvalObject *&value, int index) {
     return FindFirstNotMatchingConds(eso->GetOperands()[1], index + 1);
   else
     return FindFirstNotMatchingConds(eso->GetOperands()[2], index + 2);
+}
+
+EvalObject *SingleCycleEvaluator::GetVariableValue(EvaluatorVariable *var) {
+  return currentVariableValues.at(var);
 }
 
 SingleCycleEvaluator::~SingleCycleEvaluator() {}

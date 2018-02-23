@@ -74,6 +74,7 @@ public:
 private:
   static int serial;
   int size = 2;
+  string inst_name;
   vector<HDLDevicePort *> ports;
 };
 

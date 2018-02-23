@@ -72,6 +72,8 @@ string NumericPortType::GetVHDLType() const {
 
 int NumericPortType::GetWidth() const { return width; }
 
+bool NumericPortType::IsSigned() const { return is_signed; }
+
 string NumericPortType::VHDLCastFrom(const HDLPortType *other,
                                      const string &value) const {
   string curr_value = "";
@@ -97,5 +99,5 @@ string NumericPortType::VHDLCastFrom(const HDLPortType *other,
 string NumericPortType::GetZero() const {
   return string(is_signed ? "signed'(" : "unsigned'(") + zeros(width) + ")";
 };
-}
-}
+} // namespace HDLGen
+} // namespace RapidHLS
