@@ -2,6 +2,8 @@
 #include "BitConstant.hpp"
 #include "HDLDevice.hpp"
 #include "Operations.hpp"
+#include "HDLSignal.hpp"
+#include <optional>
 using namespace std;
 
 namespace ElasticC {
@@ -102,10 +104,10 @@ private:
 };
 
 // A buffer which passes through values without delay but will automatically
-// typecast as needed
+// typecast as needed. It can also select a bitslice of the input signal
 class BufferHDLDevice : public HDLDevice {
 public:
-  BufferHDLDevice(HDLSignal *in, HDLSignal *out);
+  BufferHDLDevice(HDLSignal *in, HDLSignal *out, optional<HDLBitSlice> _slice = optional<HDLBitSlice>());
   string GetInstanceName();
   vector<HDLDevicePort *> &GetPorts();
 
@@ -119,9 +121,34 @@ public:
   ~BufferHDLDevice();
 
 private:
+  optional<HDLBitSlice> slice;
   static int serial;
   string inst_name;
   vector<HDLDevicePort *> ports;
 };
+
+// A device which combines multiple slices into a single signal
+class CombinerHDLDevice : public HDLDevice {
+public:
+  CombinerHDLDevice(const vector<pair<HDLSignal *, HDLBitSlice>> &inputs, HDLSignal *output);
+  string GetInstanceName();
+  vector<HDLDevicePort *> &GetPorts();
+
+  vector<string> GetVHDLDeps();
+  void GenerateVHDLPrefix(ostream &vhdl);
+  void GenerateVHDL(ostream &vhdl);
+
+  void AnnotateTiming(DeviceTiming *model);
+  void AnnotateLatency(DeviceTiming *model);
+
+  ~CombinerHDLDevice();
+
+private:
+  vector<pair<HDLSignal *, HDLBitSlice>> input_slices;
+  static int serial;
+  string inst_name;
+  vector<HDLDevicePort *> ports;
+};
+
 };
 };

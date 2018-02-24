@@ -13,6 +13,7 @@ public:
   virtual string VHDLCastFrom(const HDLPortType *other,
                               const string &value) const;
   virtual string GetZero() const = 0;
+  virtual HDLPortType *Resize(int newWidth) const = 0;
 };
 
 class LogicSignalPortType : public HDLPortType {
@@ -22,6 +23,7 @@ public:
   virtual string VHDLCastFrom(const HDLPortType *other,
                               const string &value) const;
   virtual string GetZero() const;
+  virtual HDLPortType *Resize(int newWidth) const;
 };
 
 class ClockSignalPortType : public LogicSignalPortType {};
@@ -34,6 +36,7 @@ public:
   virtual string VHDLCastFrom(const HDLPortType *other,
                               const string &value) const;
   virtual string GetZero() const;
+  virtual HDLPortType *Resize(int newWidth) const;
 
 private:
   int width;
@@ -48,6 +51,7 @@ public:
   virtual string VHDLCastFrom(const HDLPortType *other,
                               const string &value) const;
   virtual string GetZero() const;
+  virtual HDLPortType *Resize(int newWidth) const;
 
 private:
   int width;

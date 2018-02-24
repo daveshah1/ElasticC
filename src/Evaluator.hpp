@@ -25,6 +25,10 @@ struct EvaluatedBlock {
   // Really nothing more than a map of variables to variable values, in
   // the single cycle case at least...
   map<EvaluatorVariable *, EvalObject *> vars;
+  // Sometimes we need to go all the way from a good'ol Parser::Variable,
+  // like for IO
+  map<Parser::Variable *, EvaluatorVariable *> parserVariables;
+
 };
 
 class Evaluator {

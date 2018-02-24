@@ -184,7 +184,7 @@ void ScalarEvaluatorVariable::Synthesise(SynthContext &sc) {
         new HDLGen::LogicSignalPortType(), "enable");
     sc.design->AddDevice(new HDLGen::OperationHDLDevice(
         OperationType::B_BWAND,
-        {sc.varSignals.at(write_enable), sc.data_enable}, gated_1));
+        {sc.varSignals.at(write_enable), sc.input_valid}, gated_1));
     HDLGen::HDLSignal *gated_2 = sc.design->CreateTempSignal(
         new HDLGen::LogicSignalPortType(), "enable");
     sc.design->AddDevice(new HDLGen::OperationHDLDevice(

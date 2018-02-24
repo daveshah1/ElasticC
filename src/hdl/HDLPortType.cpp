@@ -27,6 +27,13 @@ string LogicSignalPortType::VHDLCastFrom(const HDLPortType *other,
 
 string LogicSignalPortType::GetZero() const { return "'0'"; }
 
+HDLPortType *LogicSignalPortType::Resize(int newWidth) const {
+  if (newWidth == 1)
+    return new LogicSignalPortType();
+  else
+    return new LogicVectorPortType(newWidth);
+}
+
 LogicVectorPortType::LogicVectorPortType(int _width) : width(_width){};
 
 string LogicVectorPortType::GetVHDLType() const {
@@ -61,6 +68,10 @@ string LogicVectorPortType::VHDLCastFrom(const HDLPortType *other,
 };
 
 string LogicVectorPortType::GetZero() const { return zeros(width); };
+
+HDLPortType *LogicVectorPortType::Resize(int newWidth) const {
+  return new LogicVectorPortType(newWidth);
+}
 
 NumericPortType::NumericPortType(int _width, bool _signed)
     : width(_width), is_signed(_signed){};
@@ -99,5 +110,11 @@ string NumericPortType::VHDLCastFrom(const HDLPortType *other,
 string NumericPortType::GetZero() const {
   return string(is_signed ? "signed'(" : "unsigned'(") + zeros(width) + ")";
 };
+
+HDLPortType *NumericPortType::Resize(int newWidth) const {
+  return new NumericPortType(newWidth, is_signed);
+}
+
+
 } // namespace HDLGen
 } // namespace ElasticC

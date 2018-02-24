@@ -45,5 +45,12 @@ public:
   // Force no pipelining to occur to this signal
   bool dont_pipeline = false;
 };
-}
-}
+
+struct HDLBitSlice {
+  HDLBitSlice(int _high, int _low) : high(_high), low(_low){};
+  int low, high;
+  inline int width() { return (high - low) + 1; }
+};
+
+} // namespace HDLGen
+} // namespace ElasticC

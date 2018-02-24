@@ -294,7 +294,9 @@ ConstantHDLDevice::~ConstantHDLDevice() {
 
 int ConstantHDLDevice::serial = 0;
 
-BufferHDLDevice::BufferHDLDevice(HDLSignal *in, HDLSignal *out) {
+BufferHDLDevice::BufferHDLDevice(HDLSignal *in, HDLSignal *out,
+                                 optional<HDLBitSlice> _slice)
+    : slice(_slice) {
   inst_name = "buf_" + to_string(serial++);
   ports.push_back(
       new HDLDevicePort("in", this, in->sigType, in, PortDirection::Input));
@@ -311,10 +313,19 @@ vector<string> BufferHDLDevice::GetVHDLDeps() { return {}; }
 void BufferHDLDevice::GenerateVHDLPrefix(ostream &vhdl) {}
 
 void BufferHDLDevice::GenerateVHDL(ostream &vhdl) {
-  vhdl << "\t" << ports.at(1)->connectedNet->name << " <= "
-       << ports.at(1)->type->VHDLCastFrom(ports.at(0)->type,
-                                          ports.at(0)->connectedNet->name)
-       << ";" << endl;
+  if (slice.has_value()) {
+    vhdl << "\t" << ports.at(1)->connectedNet->name << " <= "
+         << ports.at(1)->type->VHDLCastFrom(
+                ports.at(0)->type->Resize(slice->width()),
+                ports.at(0)->connectedNet->name + "(" + to_string(slice->high) +
+                    " downto " + to_string(slice->low) + ")")
+         << ";" << endl;
+  } else {
+    vhdl << "\t" << ports.at(1)->connectedNet->name << " <= "
+         << ports.at(1)->type->VHDLCastFrom(ports.at(0)->type,
+                                            ports.at(0)->connectedNet->name)
+         << ";" << endl;
+  }
 }
 
 void BufferHDLDevice::AnnotateTiming(DeviceTiming *model) {
@@ -367,7 +378,7 @@ void MultiplexerHDLDevice::GenerateVHDL(ostream &vhdl) {
     vhdl << " when unsigned(" << ports.at(ports.size() - 2)->connectedNet->name
          << ") == " << i << " else " << endl;
   }
-  vhdl << "\t\t\t\t" <<  ports.back()->type->GetZero() << ";" << endl;
+  vhdl << "\t\t\t\t" << ports.back()->type->GetZero() << ";" << endl;
 }
 
 void MultiplexerHDLDevice::AnnotateTiming(DeviceTiming *model) {
@@ -400,6 +411,69 @@ MultiplexerHDLDevice::~MultiplexerHDLDevice() {
 }
 
 int MultiplexerHDLDevice::serial = 0;
+
+CombinerHDLDevice::CombinerHDLDevice(
+    const vector<pair<HDLSignal *, HDLBitSlice>> &inputs, HDLSignal *output)
+    : input_slices(inputs) {
+  inst_name = "combiner_" + to_string(serial++);
+  for (int i = 0; i < inputs.size(); i++)
+    ports.push_back(new HDLDevicePort(
+        "input" + to_string(i), this, inputs.at(i).first->sigType,
+        inputs.at(i).first, PortDirection::Input));
+  ports.push_back(new HDLDevicePort("output", this, output->sigType, output,
+                                    PortDirection::Output));
+}
+
+string CombinerHDLDevice::GetInstanceName() { return inst_name; }
+
+vector<HDLDevicePort *> &CombinerHDLDevice::GetPorts() { return ports; }
+
+vector<string> CombinerHDLDevice::GetVHDLDeps() {
+  return vector<string>{"ieee.std_logic_1164.all", "ieee.numeric_std.all"};
+}
+
+void CombinerHDLDevice::GenerateVHDLPrefix(ostream &vhdl) {}
+
+void CombinerHDLDevice::GenerateVHDL(ostream &vhdl) {
+  for (int i = 0; i < input_slices.size(); i++) {
+    vhdl << "\t" << ports.back()->connectedNet->name << "("
+         << input_slices.at(i).second.high << " downto "
+         << input_slices.at(i).second.low << ") <= "
+         << ports.back()
+                ->type->Resize(input_slices.at(i).second.width())
+                ->VHDLCastFrom(ports.at(i)->type,
+                               ports.at(i)->connectedNet->name)
+         << ";" << endl;
+    ;
+  }
+}
+
+void CombinerHDLDevice::AnnotateTiming(DeviceTiming *model) {
+  HDLTimingValue<double> inp_delay =
+      (*max_element(ports.begin(), ports.end() - 1,
+                    [](HDLDevicePort *a, HDLDevicePort *b) {
+                      return a->connectedNet->timing_delay <
+                             b->connectedNet->timing_delay;
+                    }))
+          ->connectedNet->timing_delay;
+  // TODO: use model to calculate device delay
+  double dev_delay = 0;
+  ports.back()->connectedNet->timing_delay = inp_delay + dev_delay;
+  // TODO: should we propogate clock domains?
+}
+
+void CombinerHDLDevice::AnnotateLatency(DeviceTiming *model) {
+  HDLTimingValue<int> inp_latency =
+      (*max_element(ports.begin(), ports.end() - 1,
+                    [](HDLDevicePort *a, HDLDevicePort *b) {
+                      return a->connectedNet->pipeline_latency <
+                             b->connectedNet->pipeline_latency;
+                    }))
+          ->connectedNet->pipeline_latency;
+  ports.back()->connectedNet->pipeline_latency = inp_latency;
+}
+
+int CombinerHDLDevice::serial = 0;
 
 } // namespace HDLGen
 } // namespace ElasticC
