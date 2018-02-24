@@ -115,12 +115,12 @@ ScalarEvaluatorVariable::ScalarEvaluatorVariable(VariableDir _dir, string _name,
   if (is_static) {
     dir.is_input = true;
     write_enable = new ScalarEvaluatorVariable(
-        VariableDir(false, true, false), name + "___wren",
+        VariableDir(false, true, false), name + "_wren",
         new IntegerType(1, false), false);
     write_enable->hasDefaultValue = true;
     write_enable->defaultValue = BitConstant(0);
     written_value = new ScalarEvaluatorVariable(VariableDir(false, true, false),
-                                                name + "___wrval", type, false);
+                                                name + "_wrval", type, false);
     written_value->hasDefaultValue = true;
     written_value->defaultValue =
         BitConstant(0); // arguablly this should be "don't care"
@@ -138,9 +138,9 @@ void ScalarEvaluatorVariable::SetDefaultValue(BitConstant defval) {
 
 EvaluatorVariable *ScalarEvaluatorVariable::GetChildByName(string name) {
   if (is_static) {
-    if (name == "__wren") {
+    if (name == "_wren") {
       return write_enable;
-    } else if (name == "___wrval") {
+    } else if (name == "_wrval") {
       return written_value;
     }
   }
@@ -203,7 +203,7 @@ ArrayEvaluatorVariable::ArrayEvaluatorVariable(VariableDir _dir, string _name,
   for (int i = 0; i < type->length; i++) {
     arrayItems.push_back(EvaluatorVariable::Create(
         VariableDir(dir.is_input, dir.is_output, false),
-        _name + "___itm" + to_string(i), type->baseType, _is_static));
+        _name + "_itm" + to_string(i), type->baseType, _is_static));
   }
 
   SetBitOffset(0);
@@ -309,22 +309,22 @@ void StructureEvaluatorVariable::HandleWrite(Evaluator *genst,
 ExternalMemoryEvaluatorVariable::ExternalMemoryEvaluatorVariable(
     VariableDir _dir, string _name, RAMType *_type)
     : EvaluatorVariable(_dir, _name), type(_type) {
-  ports["__address"] = new ScalarEvaluatorVariable(
+  ports["_address"] = new ScalarEvaluatorVariable(
       VariableDir(false, true, _dir.is_toplevel), _name + "_address",
       new IntegerType(GetAddressBusSize(type->length), false), false);
-  ports["__address"]->SetDefaultValue(BitConstant(0));
+  ports["_address"]->SetDefaultValue(BitConstant(0));
 
-  ports["__q"] =
+  ports["_q"] =
       new ScalarEvaluatorVariable(VariableDir(true, false, _dir.is_toplevel),
                                   _name + "_q", &(type->baseType), false);
 
   if (!type->is_rom) {
-    ports["__wren"] = new ScalarEvaluatorVariable(
+    ports["_wren"] = new ScalarEvaluatorVariable(
         VariableDir(false, true, _dir.is_toplevel), _name + "_wren",
         new IntegerType(1, false), false);
-    ports["__wren"]->SetDefaultValue(BitConstant(0));
+    ports["_wren"]->SetDefaultValue(BitConstant(0));
 
-    ports["__data"] =
+    ports["_data"] =
         new ScalarEvaluatorVariable(VariableDir(false, true, _dir.is_toplevel),
                                     _name + "_data", &(type->baseType), false);
   }
@@ -373,8 +373,8 @@ EvalObject *ExternalMemoryEvaluatorVariable::HandleSubscriptedRead(
     throw eval_error("invalid dimensions for access to variable ===" + name +
                      "===");
   }
-  genst->SetVariableValue(ports.at("__address"), index[0]);
-  return new EvalVariable(ports.at("__q"));
+  genst->SetVariableValue(ports.at("_address"), index[0]);
+  return new EvalVariable(ports.at("_q"));
 }
 
 void ExternalMemoryEvaluatorVariable::HandleSubscriptedWrite(
@@ -386,9 +386,9 @@ void ExternalMemoryEvaluatorVariable::HandleSubscriptedWrite(
   if (type->is_rom) {
     throw eval_error("cannot write to ROM type variable ===" + name + "===");
   }
-  genst->SetVariableValue(ports.at("__address"), index[0]);
-  genst->SetVariableValue(ports.at("__wren"), new EvalConstant(BitConstant(1)));
-  genst->SetVariableValue(ports.at("__data"), value);
+  genst->SetVariableValue(ports.at("_address"), index[0]);
+  genst->SetVariableValue(ports.at("_wren"), new EvalConstant(BitConstant(1)));
+  genst->SetVariableValue(ports.at("_data"), value);
 }
 
 EvalObject *ExternalMemoryEvaluatorVariable::HandleRead(Evaluator *genst) {
@@ -410,14 +410,14 @@ StreamEvaluatorVariable::StreamEvaluatorVariable(VariableDir _dir, string _name,
   }
   for (int i = 0; i < totalSize; i++) {
     streamWindow.push_back(EvaluatorVariable::Create(
-        VariableDir(true, false, false), _name + "___itm" + to_string(i),
+        VariableDir(true, false, false), _name + "_itm" + to_string(i),
         type->baseType, false));
   }
   written_value = EvaluatorVariable::Create(
-      VariableDir(false, true, false), _name + "___wrval", type->baseType,
+      VariableDir(false, true, false), _name + "_wrval", type->baseType,
       false); // TODO: default value for this
   write_enable = new ScalarEvaluatorVariable(VariableDir(false, true, false),
-                                             name + "___wren",
+                                             name + "_wren",
                                              new IntegerType(1, false), false);
   write_enable->SetDefaultValue(BitConstant(0));
   dir.is_toplevel = false;
@@ -439,9 +439,9 @@ vector<EvaluatorVariable *> StreamEvaluatorVariable::GetArrayChildren() {
 }
 
 EvaluatorVariable *StreamEvaluatorVariable::GetChildByName(string name) {
-  if (name == "__wrval")
+  if (name == "_wrval")
     return written_value;
-  else if (name == "__wren")
+  else if (name == "_wren")
     return write_enable;
   else
     return EvaluatorVariable::GetChildByName(name);

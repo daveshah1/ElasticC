@@ -16,7 +16,7 @@ using namespace HDLGen;
 static void UnpackInput(HDLSignal *inpsig, SynthContext &sc,
                         EvaluatorVariable *ev) {
   if (ev->IsScalar()) {
-    string hdlname = "__int_" + ev->name;
+    string hdlname = "ecc_int_" + ev->name;
     HDLPortType *pty = ev->GetType()->GetHDLType();
     HDLSignal *sig = new HDLSignal(hdlname, pty);
     sc.varSignals[ev] = sig;
@@ -36,7 +36,7 @@ static void UnpackInput(HDLSignal *inpsig, SynthContext &sc,
 static void PackOutput(vector<pair<HDLSignal *, HDLBitSlice>> &outputSlices,
                        SynthContext &sc, EvaluatorVariable *ev) {
   if (ev->IsScalar()) {
-    string hdlname = "__int_" + ev->name;
+    string hdlname = "ecc_int_" + ev->name;
     HDLPortType *pty = ev->GetType()->GetHDLType();
     HDLSignal *sig = new HDLSignal(hdlname, pty);
     sc.varSignals[ev] = sig;
@@ -120,12 +120,16 @@ SynthContext MakeSynthContext(Parser::HardwareBlock *hwblk,
 
   // Internal signals
   for(auto sigval : evb->vars) {
-    if(ctx.drivenSignals.find(sigval.first) == ctx.drivenSignals.end()) {
-      ctx.drivenSignals.insert(sigval.first);
+    if(ctx.varSignals.find(sigval.first) == ctx.varSignals.end()) {
       HDLSignal *hdlsig = new HDLSignal(sigval.first->name, sigval.first->GetType()->GetHDLType());
       ctx.design->AddSignal(hdlsig);
-      sigval.second->Synthesise(evb->eval, ctx, hdlsig);
       ctx.varSignals[sigval.first] = hdlsig;
+    }
+  }
+  for(auto sigval : evb->vars) {
+    if(ctx.drivenSignals.find(sigval.first) == ctx.drivenSignals.end()) {
+      ctx.drivenSignals.insert(sigval.first);
+      sigval.second->Synthesise(evb->eval, ctx, ctx.varSignals.at(sigval.first));
     }
   }
 

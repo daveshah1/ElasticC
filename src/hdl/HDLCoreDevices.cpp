@@ -272,12 +272,21 @@ vector<string> ConstantHDLDevice::GetVHDLDeps() {
 void ConstantHDLDevice::GenerateVHDLPrefix(ostream &vhdl) {}
 
 void ConstantHDLDevice::GenerateVHDL(ostream &vhdl) {
-  NumericPortType cType(value.bits.size(), value.is_signed);
-  vhdl << "\t" << ports.at(0)->connectedNet->name << " <= "
-       << ports.at(0)->type->VHDLCastFrom(
-              &cType, string(value.is_signed ? "signed'(" : "unsigned'(") +
-                          value.to_string() + ")")
-       << ";" << endl;
+  if(dynamic_cast<LogicSignalPortType*>(ports.at(0)->type) != nullptr) {
+    if(value.intval() == 0) {
+      vhdl << "\t" << ports.at(0)->connectedNet->name << " <= '0';" << endl;
+    } else {
+      vhdl << "\t" << ports.at(0)->connectedNet->name << " <= '1';" << endl;
+    }
+  } else {
+    NumericPortType cType(value.bits.size(), value.is_signed);
+    vhdl << "\t" << ports.at(0)->connectedNet->name << " <= "
+         << ports.at(0)->type->VHDLCastFrom(
+                &cType, string(value.is_signed ? "signed'(" : "unsigned'(") +
+                            value.to_string() + ")")
+         << ";" << endl;
+  }
+
 }
 
 void ConstantHDLDevice::AnnotateTiming(DeviceTiming *model) {

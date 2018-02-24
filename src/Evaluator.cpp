@@ -5,6 +5,7 @@
 #include "Util.hpp"
 #include <algorithm>
 #include <iterator>
+#include <typeinfo>
 using namespace std;
 namespace ElasticC {
 Evaluator::Evaluator(Parser::GlobalScope *_gs) : gs(_gs) {
@@ -29,15 +30,17 @@ EvaluatorVariable *Evaluator::AddVariable(Parser::Variable *orig,
                                           bool is_block_output) {
   bool is_const =
       (find(orig->qualifiers.begin(), orig->qualifiers.end(),
-            Parser::VariableQualifier::CONST) == orig->qualifiers.end());
+            Parser::VariableQualifier::CONST) != orig->qualifiers.end());
   bool is_static =
       (find(orig->qualifiers.begin(), orig->qualifiers.end(),
-            Parser::VariableQualifier::STATIC) == orig->qualifiers.end());
+            Parser::VariableQualifier::STATIC) != orig->qualifiers.end());
   // TODO: better initialiser list handling
   EvalObject *init = EvaluateExpression(orig->initialiser);
   DataType *type = orig->type->Resolve(this, tpContext, init);
   // TODO: unique naming in a better way
-  string uname = orig->name + "___" + to_string(GetUniqueID());
+  string uname = (is_block_input || is_block_output)
+                     ? orig->name
+                     : (orig->name + "_ecc_" + to_string(GetUniqueID()));
 
   VariableDir dir{is_block_input, is_block_output,
                   is_block_input || is_block_output};
@@ -381,8 +384,11 @@ EvalObject *SingleCycleEvaluator::EvaluateExpression(Parser::Expression *expr) {
              nullptr) {
     return new EvalConstant(
         tpContext->GetNumericParameter(this, tpt->pcontext, tpt->index));
+  } else if (expr == Parser::NullExpression) {
+    return EvalNull;
   } else {
-    throw eval_error("FIXME: unsupported expression token type");
+    throw runtime_error(string("FIXME: unsupported expression token type ") +
+                        string(typeid(*expr).name()));
   }
 };
 

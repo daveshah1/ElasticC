@@ -9,8 +9,8 @@ namespace ElasticC {
 namespace HDLGen {
 
 HDLDesign::HDLDesign(string _name) : name(_name) {
-  gnd = new HDLSignal("__gnd__", new LogicSignalPortType());
-  vcc = new HDLSignal("__vcc__", new LogicSignalPortType());
+  gnd = new HDLSignal("ecc_gnd", new LogicSignalPortType());
+  vcc = new HDLSignal("ecc_vcc", new LogicSignalPortType());
   AddSignal(gnd);
   AddSignal(vcc);
   AddDevice(new ConstantHDLDevice(0, gnd));
@@ -21,7 +21,7 @@ void HDLDesign::AddSignal(HDLSignal *sig) { signals.push_back(sig); }
 
 HDLSignal *HDLDesign::CreateTempSignal(HDLPortType *type, string prefix) {
   static int inc = 0;
-  HDLSignal *sig = new HDLSignal(prefix + "_" + to_string(inc++) + "_", type);
+  HDLSignal *sig = new HDLSignal(prefix + "_ecc_" + to_string(inc++), type);
   AddSignal(sig);
   return sig;
 }
@@ -64,13 +64,15 @@ void HDLDesign::GenerateVHDLFile(ostream &out) {
   out << "end " << name << ";" << endl << endl;
 
   out << "architecture hls_gen of " << name << " is" << endl;
-  for (auto sig : signals)
-    sig->GenerateVHDL(out);
+  for (auto sig : signals) {
+    if (find_if(ports.begin(), ports.end(), [this, sig](HDLDevicePort *p) {
+          return (p->connectedNet == sig);
+        }) == ports.end())
+      sig->GenerateVHDL(out);
+  }
   for (auto dev : devices)
     dev->GenerateVHDLPrefix(out);
   out << "begin" << endl;
-  for (auto port : ports)
-    port->GenerateVHDLWire(out);
   out << endl;
   for (auto dev : devices)
     dev->GenerateVHDL(out);
