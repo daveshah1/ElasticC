@@ -20,6 +20,7 @@ namespace ElasticC {
 
 class CallStackEntry;
 class TemplateParamContext;
+class Evaluator;
 
 struct EvaluatedBlock {
   // Really nothing more than a map of variables to variable values, in
@@ -28,7 +29,8 @@ struct EvaluatedBlock {
   // Sometimes we need to go all the way from a good'ol Parser::Variable,
   // like for IO
   map<Parser::Variable *, EvaluatorVariable *> parserVariables;
-
+  // Passed to Synthesise
+  Evaluator *eval;
 };
 
 class Evaluator {

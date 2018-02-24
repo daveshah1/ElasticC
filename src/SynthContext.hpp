@@ -2,6 +2,7 @@
 #include "hdl/HDLDesign.hpp"
 #include "hdl/HDLSignal.hpp"
 #include <map>
+#include <set>
 using namespace std;
 
 namespace ElasticC {
@@ -15,6 +16,7 @@ struct SynthContext {
   HDLGen::HDLDesign *design;
   HDLGen::HDLSignal *clock, *clock_enable, *input_valid, *output_valid, *reset;
   map<EvaluatorVariable *, HDLGen::HDLSignal *> varSignals;
+  set<EvaluatorVariable *> drivenSignals;
 };
 
 // Construct a SynthContext and make a skeleton HDL design from a hardware block

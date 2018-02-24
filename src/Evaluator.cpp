@@ -408,7 +408,7 @@ EvalObject *SingleCycleEvaluator::GetVariableValue(EvaluatorVariable *var) {
 }
 
 EvaluatedBlock SingleCycleEvaluator::GetEvaluatedBlock() {
-  return EvaluatedBlock{currentVariableValues, parserVariables};
+  return EvaluatedBlock{currentVariableValues, parserVariables, this};
 }
 
 SingleCycleEvaluator::~SingleCycleEvaluator() {}

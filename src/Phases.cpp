@@ -35,5 +35,19 @@ SynthContext MakeHDLDesign(Parser::HardwareBlock *top, EvaluatedBlock *block) {
   return MakeSynthContext(top, block);
 }
 
+void PipelineHDLDesign(HDLGen::HDLDesign *hdld, SynthContext &sc) {
+  // TODO
+}
+
+void PrintTiming(HDLGen::HDLDesign *hdld, SynthContext &sc) {
+  // TODO
+}
+
+void GenerateVHDL(HDLGen::HDLDesign *hdld, string file) {
+  ofstream ofs(file);
+  if (!ofs)
+    PrintMessage(MSG_ERROR, "failed to open output file ===" + file + "===");
+  hdld->GenerateVHDLFile(ofs);
+}
 
 }; // namespace ElasticC

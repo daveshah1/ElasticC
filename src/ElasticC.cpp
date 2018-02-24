@@ -61,6 +61,55 @@ int main(int argc, char const *argv[]) {
 	} catch (Parser::parse_error &e) {
 		PrintMessage(MSG_ERROR, "Parse Error: " + string(e.what()), ps.GetLine());
 	}
+	EvaluatedBlock evb;
+
+	Parser::HardwareBlock *blktop = nullptr;
+	if(gs->blocks.size() == 0) {
+		PrintMessage(MSG_NOTE, "design contains no hardware blocks, nothing to do");
+		return 0;
+	} else if(gs->blocks.size() > 1 || vm.count("top")) {
+		if(!vm.count("top")) {
+			PrintMessage(MSG_ERROR, "multiple hardware blocks found but none specified, use --top to specify one");
+		}
+		for(auto blk : gs->blocks) {
+			if(blk->name == vm.at("top").as<string>()) {
+				blktop = blk;
+				break;
+			}
+		}
+		if(blktop == nullptr) {
+			PrintMessage(MSG_ERROR, "hardware block ===" + vm.at("top").as<string>() + "=== was not found in design");
+		}
+	} else {
+		blktop = gs->blocks.at(0);
+	}
+
+	try {
+		evb = EvaluateCode(new SingleCycleEvaluator(gs), blktop);
+	} catch (eval_error &e) {
+		PrintMessage(MSG_ERROR, "Evaluation Error: " + string(e.what()));
+	}
+
+	OptimiseBlock(&evb);
+
+	// Convert the optimised block to a HDL style netlist
+	SynthContext sc = MakeHDLDesign(blktop, &evb);
+
+	// Insert pipeline registers as needed in the HDL netlist
+  PipelineHDLDesign(sc.design, sc);
+
+	// Print a final timing and pipeling report
+	PrintTiming(sc.design, sc);
+
+	string outfile;
+	if(vm.count("output"))
+		outfile = vm.at("output").as<string>();
+	else
+		outfile = vm.at("input").as<string>() + ".vhd";
+
+	// Save the HDL design to a VHDL file
+	GenerateVHDL(sc.design, outfile);
+
 
 	return 0;
 }

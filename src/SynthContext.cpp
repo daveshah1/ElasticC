@@ -20,6 +20,7 @@ static void UnpackInput(HDLSignal *inpsig, SynthContext &sc,
     HDLPortType *pty = ev->GetType()->GetHDLType();
     HDLSignal *sig = new HDLSignal(hdlname, pty);
     sc.varSignals[ev] = sig;
+    sc.drivenSignals.insert(ev);
     sc.design->AddSignal(sig);
     int offset_low = ev->GetBitOffset();
     int offset_high = (pty->GetWidth() - 1) + offset_low;
@@ -116,6 +117,18 @@ SynthContext MakeSynthContext(Parser::HardwareBlock *hwblk,
     GenerateIO(ctx, evb->parserVariables.at(inp), true, false);
   for (auto op : hwblk->outputs)
     GenerateIO(ctx, evb->parserVariables.at(op), false, true);
+
+  // Internal signals
+  for(auto sigval : evb->vars) {
+    if(ctx.drivenSignals.find(sigval.first) == ctx.drivenSignals.end()) {
+      ctx.drivenSignals.insert(sigval.first);
+      HDLSignal *hdlsig = new HDLSignal(sigval.first->name, sigval.first->GetType()->GetHDLType());
+      ctx.design->AddSignal(hdlsig);
+      sigval.second->Synthesise(evb->eval, ctx, hdlsig);
+      ctx.varSignals[sigval.first] = hdlsig;
+    }
+  }
+
   return ctx;
 }
 
