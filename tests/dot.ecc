@@ -1,0 +1,8 @@
+const int N = 3;
+
+block dot(clock<50000000>, reset, int8_t a[N], int8_t b[N]) => (int16_t q) {
+	int16_t sum = 0;
+	for(int i = 0; i < N; i++)
+		sum += a[i] * b[i];
+	q = sum;
+};

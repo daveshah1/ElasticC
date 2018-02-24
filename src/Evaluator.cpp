@@ -314,8 +314,14 @@ EvalObject *SingleCycleEvaluator::EvaluateExpression(Parser::Expression *expr) {
     if (parserVariables.find(vart->var) != parserVariables.end()) {
       return new EvalVariable(parserVariables.at(vart->var));
     } else {
-      throw eval_error("variable " + vart->var->name +
-                       " not declared properly");
+      vector<Parser::Variable *> globalVars = gs->GetDeclaredVariables();
+      if(find(globalVars.begin(), globalVars.end(), vart->var) == globalVars.end())
+        throw eval_error("variable " + vart->var->name +
+                         " not declared properly");
+      ConstantParser cp(gs);
+      // TODO: const arrays
+      BitConstant cnstVal = cp.ParseConstexpr(vart->var->initialiser);
+      return new EvalConstant(cnstVal);
     }
   } else if ((arrs = dynamic_cast<Parser::ArraySubscript *>(expr)) != nullptr) {
     vector<EvalObject *> evalIndex;

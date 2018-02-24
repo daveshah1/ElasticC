@@ -79,7 +79,8 @@ const vector<Operation> unaryPostfixOperations = {
     {U_POSTINC, "++", 2, 1, false, true}, {U_POSTDEC, "--", 2, 1, false, true}};
 // NYI: prefix ++/--, unary -
 const vector<Operation> unaryPrefixOperations = {
-    {U_BWNOT, "~", 3, 1, true, false}, {U_LNOT, "!", 3, 1, true, false}};
+    {U_BWNOT, "~", 3, 1, true, false}, {U_LNOT, "!", 3, 1, true, false},
+    {U_PREINC, "++", 3, 1, true, true}, {U_PREDEC, "--", 3, 1, true, true}};
 const vector<Operation> binaryOperations = {
     {B_MUL, "*", 5, 2, false, false},     {B_DIV, "/", 5, 2, false, false},
     {B_MOD, "%", 5, 2, false, false},     {B_ADD, "+", 6, 2, false, false},

@@ -614,7 +614,7 @@ Expression *ECCParser::ParseExpression(vector<char> terminators, Context *ctx) {
       lastWasOperation = true;
     } else if (code.PeekNext() == ')') {
       while ((!opStack.empty()) &&
-             (opStack.top().type == OpStackItemType::L_PAREN)) {
+             (opStack.top().type != OpStackItemType::L_PAREN)) {
         ApplyFromOpStack(opStack, parseStack);
       }
       if (opStack.empty()) {
@@ -629,11 +629,14 @@ Expression *ECCParser::ParseExpression(vector<char> terminators, Context *ctx) {
       } else {
         opStack.pop(); // pop parenthesis from the operator stack
       }
-      // definitely not the terminator so we can pull it from the parse stream
-      // (if it is a terminator we need to keep it as other code might need to
-      // see what the terminator was if more than one was specified)
-      code.GetNext();
-      lastWasOperation = false;
+      if(!isDone) {
+        // definitely not the terminator so we can pull it from the parse stream
+        // (if it is a terminator we need to keep it as other code might need to
+        // see what the terminator was if more than one was specified)
+        code.GetNext();
+        lastWasOperation = false;
+      }
+
     } else if (code.PeekNextIdentOrLiteral().size() > 0) {
       string nextIdent = code.PeekNextIdentOrLiteral();
       // assume identifier as didn't look like literal earlier
@@ -728,8 +731,16 @@ Expression *ECCParser::ParseExpression(vector<char> terminators, Context *ctx) {
         }
         opStack.push(OperationStackItem(OpStackItemType::OPER, operType));
       } else {
-        throw parse_error(string("unexpected character ") + code.PeekNext() +
-                          string(" in expression"));
+        if(code.PeekNext() == ';') {
+          std::string tstr = "";
+          for(auto term : terminators)
+            tstr += string(" ") + term;
+          throw parse_error(string("unexpected ===;===, expected") + tstr);
+        } else {
+          throw parse_error(string("unexpected character ") + code.PeekNext() +
+                            string(" in expression"));
+        }
+
       }
     }
 
@@ -775,11 +786,13 @@ Expression *ECCParser::ParseVarExpression(Context *ctx) {
   code.Skip();
   while ((code.PeekNext() == '[') || (code.PeekNext() == '.')) {
     if (code.PeekNext() == '[') {
+      code.GetNext();
       vector<Expression *> index = ParseExpressionList(ctx, ']');
       if (!code.CheckMatchAndGet(']'))
         throw parse_error("expected end of array index");
       expr = new ArraySubscript(expr, index);
     } else if (code.PeekNext() == '.') {
+      code.GetNext();
       string memName = code.GetNextIdentOrLiteral();
       if (memName.size() == 0)
         throw parse_error("expected a structure member name");
