@@ -129,6 +129,9 @@ public:
                                 EvalObject *value);
   vector<EvalObject *> GetOperands();
 
+  void Synthesise(Evaluator *state, const SynthContext &sc,
+                  HDLGen::HDLSignal *outputNet);
+
 private:
   ArrayType *arrType;
   vector<EvalObject *> items;

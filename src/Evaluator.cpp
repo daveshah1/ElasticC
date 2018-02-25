@@ -105,7 +105,10 @@ EvalObject *Evaluator::ProcessFunctionCall(
                        "=== (expected " + to_string(func->arguments.size()) +
                        ", got " + to_string(arguments.size()) + ")");
     }
-    SetVariableValue(AddVariable(func->arguments[i].first), arguments[i]);
+    // SetVariableValue(AddVariable(func->arguments[i].first),
+    // arguments[i]->GetValue(this));
+    EvaluatorVariable *newVar = AddVariable(func->arguments[i].first);
+    EvalVariable(newVar).AssignValue(this, arguments[i]->GetValue(this));
   }
 
   callStack.push(cse);
@@ -120,8 +123,6 @@ EvalObject *Evaluator::ProcessFunctionCall(
   };
   parserVariables = cse->savedParserVariables;
   tpContext = cse->oldTpContext;
-
-
 
   if (func->is_void) {
     return EvalNull;
@@ -182,10 +183,33 @@ Evaluator::~Evaluator() {}
 SingleCycleEvaluator::SingleCycleEvaluator(Parser::GlobalScope *_gs)
     : Evaluator(_gs){};
 
+EvalObject *SingleCycleEvaluator::GetInputValue(EvaluatorVariable *var) {
+  if (var->IsScalar()) {
+    return new EvalVariable(var);
+  } else {
+    vector<EvaluatorVariable *> aevs = var->GetArrayChildren();
+    if (aevs.size() > 0) {
+      vector<EvalObject *> values;
+      transform(aevs.begin(), aevs.end(), back_inserter(values),
+                [this](EvaluatorVariable *var) { return GetInputValue(var); });
+      return new EvalArray(dynamic_cast<ArrayType *>(var->GetType()), values);
+    } else {
+      StructureType *st = dynamic_cast<StructureType *>(var->GetType());
+      if (st == nullptr)
+        throw eval_error(
+            "unknown IO type while processing port  ===" + var->name + "===");
+      map<string, EvalObject *> structItems;
+      for (auto item : st->content)
+        structItems[item.name] = GetInputValue(var->GetChildByName(item.name));
+      return new EvalStruct(st, structItems);
+    }
+  }
+}
+
 void SingleCycleEvaluator::AddVariable(EvaluatorVariable *var) {
   Evaluator::AddVariable(var);
   if (var->GetDir().is_input) {
-    currentVariableValues[var] = new EvalVariable(var);
+    currentVariableValues[var] = GetInputValue(var);
   } else {
     currentVariableValues[var] = new EvalDontCare(var->GetType());
   }
@@ -276,7 +300,6 @@ void SingleCycleEvaluator::EvaluateStatement(Parser::Statement *stmt) {
           EvaluateStatement(forl->body);
           EvaluateStatement(forl->incrementer);
         }
-
       }
     } else if ((retst = dynamic_cast<Parser::ReturnStatement *>(stmt))) {
       // TODO: multiple `return` statements
@@ -327,7 +350,8 @@ EvalObject *SingleCycleEvaluator::EvaluateExpression(Parser::Expression *expr) {
       return new EvalVariable(parserVariables.at(vart->var));
     } else {
       vector<Parser::Variable *> globalVars = gs->GetDeclaredVariables();
-      if(find(globalVars.begin(), globalVars.end(), vart->var) == globalVars.end())
+      if (find(globalVars.begin(), globalVars.end(), vart->var) ==
+          globalVars.end())
         throw eval_error("variable " + vart->var->name +
                          " not declared properly");
       ConstantParser cp(gs);
@@ -346,12 +370,11 @@ EvalObject *SingleCycleEvaluator::EvaluateExpression(Parser::Expression *expr) {
                                 mema->memberName);
   } else if ((funcc = dynamic_cast<Parser::FunctionCall *>(expr)) != nullptr) {
     vector<EvalObject *> evalOperands;
-    transform(
-        funcc->operands.begin(), funcc->operands.end(), back_inserter(evalOperands),
-        [this](Parser::Expression *exp) { return EvaluateExpression(exp); });
-    return ProcessFunctionCall(
-        funcc->func, evalOperands,
-        funcc->params);
+    transform(funcc->operands.begin(), funcc->operands.end(),
+              back_inserter(evalOperands), [this](Parser::Expression *exp) {
+                return EvaluateExpression(exp);
+              });
+    return ProcessFunctionCall(funcc->func, evalOperands, funcc->params);
   } else if ((il = dynamic_cast<Parser::InitialiserList *>(expr)) != nullptr) {
     throw eval_error("initialiser list not permitted here");
 

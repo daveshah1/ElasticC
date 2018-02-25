@@ -276,6 +276,35 @@ void EvalArray::ApplyArraySubscriptWrite(Evaluator *state,
 
 vector<EvalObject *> EvalArray::GetOperands() { return items; }
 
+void EvalArray::Synthesise(Evaluator *state, const SynthContext &sc,
+                           HDLGen::HDLSignal *outputNet) {
+  // TODO dimensions
+  if (arrType->GetDimensions().size() != 1)
+    throw eval_error("multi-dimensional arrays cannot be synthesised to HDL");
+  vector<pair<HDLGen::HDLSignal *, HDLGen::HDLBitSlice>> slices;
+  int offset = 0;
+  int N = arrType->GetDimensions().at(0);
+  int M = arrType->baseType->GetWidth();
+
+  vector<HDLGen::HDLSignal *> operandSigs;
+
+  transform(items.begin(), items.end(), back_inserter(operandSigs),
+            [sc, state](EvalObject *op) {
+              HDLGen::HDLSignal *res = sc.design->CreateTempSignal(
+                  op->GetDataType(state)->GetHDLType());
+              op->Synthesise(state, sc, res);
+              return res;
+            });
+
+  for (int i = 0; i < N; i++) {
+    slices.push_back(make_pair(operandSigs.at(i),
+                               HDLGen::HDLBitSlice(offset + M - 1, offset)));
+    offset += M;
+  }
+  sc.design->AddDevice(new HDLGen::CombinerHDLDevice(slices, outputNet));
+
+}
+
 /*EvalStruct*/
 EvalStruct::EvalStruct(StructureType *_structType,
                        const map<string, EvalObject *> _items)
@@ -445,10 +474,10 @@ EvalObject *EvalBasicOperation::ApplyToState(Evaluator *state) {
       // value is the same as the result value
       if (type == U_POSTINC) {
         operands.at(0)->AssignValue(state,
-                                   GetResult(state, apOperands, U_PREINC));
+                                    GetResult(state, apOperands, U_PREINC));
       } else if (type == U_POSTDEC) {
         operands.at(0)->AssignValue(state,
-                                   GetResult(state, apOperands, U_PREDEC));
+                                    GetResult(state, apOperands, U_PREDEC));
       } else {
         operands.at(0)->AssignValue(state, result);
       }
@@ -840,7 +869,6 @@ void EvalDontCare::Synthesise(Evaluator *state, const SynthContext &sc,
 EvalNull_class::EvalNull_class() : EvalObject(){};
 
 string EvalNull_class::GetID() { return "<null>"; };
-
 
 DataType *EvalNull_class::GetDataType(Evaluator *state) {
   DEBUG_BREAKPOINT();

@@ -110,6 +110,7 @@ public:
   SingleCycleEvaluator(Parser::GlobalScope *_gs);
   virtual void EvaluateBlock(Parser::HardwareBlock *block);
   virtual void AddVariable(EvaluatorVariable *var);
+  virtual EvalObject *GetInputValue(EvaluatorVariable *var);
   virtual void SetVariableValue(EvaluatorVariable *var, EvalObject *value);
   virtual EvalObject *GetVariableValue(EvaluatorVariable *var);
   virtual void EvaluateStatement(Parser::Statement *stmt);
