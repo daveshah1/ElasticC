@@ -30,6 +30,9 @@ static void UnpackInput(HDLSignal *inpsig, SynthContext &sc,
     vector<EvaluatorVariable *> chld = ev->GetAllChildren();
     for_each(chld.begin(), chld.end(),
              [&](EvaluatorVariable *ch) { UnpackInput(inpsig, sc, ch); });
+    // Ignore during evaluation
+    sc.varSignals[ev] = nullptr;
+    sc.drivenSignals.insert(ev);
   }
 }
 
@@ -49,6 +52,9 @@ static void PackOutput(vector<pair<HDLSignal *, HDLBitSlice>> &outputSlices,
     vector<EvaluatorVariable *> chld = ev->GetAllChildren();
     for_each(chld.begin(), chld.end(),
              [&](EvaluatorVariable *ch) { PackOutput(outputSlices, sc, ch); });
+    // Ignore during evaluation
+    sc.varSignals[ev] = nullptr;
+    sc.drivenSignals.insert(ev);
   }
 }
 
@@ -56,8 +62,9 @@ static void GenerateIO(SynthContext &sc, EvaluatorVariable *ev, bool is_input,
                        bool is_output) {
   HDLPortType *topType =
       (ev->GetType()->GetWidth() == 1)
-          ? static_cast<HDLPortType*>(new LogicSignalPortType())
-          : static_cast<HDLPortType*>(new LogicVectorPortType(ev->GetType()->GetWidth()));
+          ? static_cast<HDLPortType *>(new LogicSignalPortType())
+          : static_cast<HDLPortType *>(
+                new LogicVectorPortType(ev->GetType()->GetWidth()));
   HDLSignal *iosig = new HDLSignal(ev->name, topType);
   if (is_input) {
     sc.design->AddPortFromSig(iosig, PortDirection::Input);
@@ -119,17 +126,19 @@ SynthContext MakeSynthContext(Parser::HardwareBlock *hwblk,
     GenerateIO(ctx, evb->parserVariables.at(op), false, true);
 
   // Internal signals
-  for(auto sigval : evb->vars) {
-    if(ctx.varSignals.find(sigval.first) == ctx.varSignals.end()) {
-      HDLSignal *hdlsig = new HDLSignal(sigval.first->name, sigval.first->GetType()->GetHDLType());
+  for (auto sigval : evb->vars) {
+    if (ctx.varSignals.find(sigval.first) == ctx.varSignals.end()) {
+      HDLSignal *hdlsig = new HDLSignal(sigval.first->name,
+                                        sigval.first->GetType()->GetHDLType());
       ctx.design->AddSignal(hdlsig);
       ctx.varSignals[sigval.first] = hdlsig;
     }
   }
-  for(auto sigval : evb->vars) {
-    if(ctx.drivenSignals.find(sigval.first) == ctx.drivenSignals.end()) {
+  for (auto sigval : evb->vars) {
+    if (ctx.drivenSignals.find(sigval.first) == ctx.drivenSignals.end()) {
       ctx.drivenSignals.insert(sigval.first);
-      sigval.second->Synthesise(evb->eval, ctx, ctx.varSignals.at(sigval.first));
+      sigval.second->Synthesise(evb->eval, ctx,
+                                ctx.varSignals.at(sigval.first));
     }
   }
 

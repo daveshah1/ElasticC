@@ -267,9 +267,11 @@ void SingleCycleEvaluator::EvaluateStatement(Parser::Statement *stmt) {
         }
         if (cond->GetScalarConstValue(this).intval() == 0) {
           loopDone = true;
+        } else {
+          EvaluateStatement(forl->body);
+          EvaluateStatement(forl->incrementer);
         }
-        EvaluateStatement(forl->body);
-        EvaluateStatement(forl->incrementer);
+
       }
     } else if (stmt == Parser::NullStatement) {
       // do nothing
