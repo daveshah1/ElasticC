@@ -24,6 +24,8 @@ public:
   // Annotate timing and latencies for this device only
   virtual void AnnotateTiming(DeviceTiming *model);
   virtual void AnnotateLatency(DeviceTiming *model);
+
+  virtual ~HDLDevice();
 };
 // Represents some arbitrary HDL device; for example a vendor provided primitive
 // or user created VHDL component

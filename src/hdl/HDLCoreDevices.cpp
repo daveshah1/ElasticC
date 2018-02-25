@@ -482,6 +482,10 @@ void CombinerHDLDevice::AnnotateLatency(DeviceTiming *model) {
   ports.back()->connectedNet->pipeline_latency = inp_latency;
 }
 
+CombinerHDLDevice::~CombinerHDLDevice() {
+  for_each(ports.begin(), ports.end(), [](HDLDevicePort *p) { delete p; });
+}
+
 int CombinerHDLDevice::serial = 0;
 
 } // namespace HDLGen

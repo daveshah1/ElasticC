@@ -24,6 +24,9 @@ void OptimiseBlock(EvaluatedBlock *block);
 // Convert the optimised block to a HDL style netlist
 SynthContext MakeHDLDesign(Parser::HardwareBlock *top, EvaluatedBlock *block);
 
+// Optimise the synthesized HDL design
+void OptimiseHDLDesign(HDLGen::HDLDesign *hdld, SynthContext &sc);
+
 // Insert pipeline registers as needed in the HDL netlist
 void PipelineHDLDesign(HDLGen::HDLDesign *hdld, SynthContext &sc);
 

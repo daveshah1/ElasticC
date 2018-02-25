@@ -95,6 +95,9 @@ int main(int argc, char const *argv[]) {
 	// Convert the optimised block to a HDL style netlist
 	SynthContext sc = MakeHDLDesign(blktop, &evb);
 
+	// Optimise the generated HDL design
+	OptimiseHDLDesign(sc.design, sc);
+
 	// Insert pipeline registers as needed in the HDL netlist
   PipelineHDLDesign(sc.design, sc);
 

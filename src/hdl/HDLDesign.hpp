@@ -6,6 +6,7 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <list>
 
 namespace ElasticC {
 namespace HDLGen {
@@ -26,6 +27,20 @@ public:
 
   HDLSignal *CreateTempSignal(HDLPortType *type, string prefix = "temp");
   void AddDevice(HDLDevice *dev);
+
+  void RemoveDevice(HDLDevice *dev);
+  void RemoveSignal(HDLSignal *sig);
+  // Return the number of input ports driven by a signal
+  int GetSignalFanout(HDLSignal *sig);
+  // Return the total number of inputs drvien by all outputs of a device
+  int GetDeviceFanout(HDLDevice *dev);
+
+  // Remove devices and signals that have no bearing on the output
+  void Prune();
+  // Run a single pass removing devices with no fanout, returning true on change
+  bool PruneDevicesPass();
+  // Run a single pass pruning nets with no connections
+  void PruneNetsPass();
 
   void GenerateVHDLFile(ostream &out);
 

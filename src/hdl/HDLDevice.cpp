@@ -9,5 +9,8 @@ void HDLDevice::GenerateVHDLPrefix(ostream &vhdl) {}
 void HDLDevice::GenerateVHDL(ostream &vhdl) {}
 void HDLDevice::AnnotateTiming(DeviceTiming *model) {}
 void HDLDevice::AnnotateLatency(DeviceTiming *model) {}
+HDLDevice::~HDLDevice() {};
+
+
 }
 }

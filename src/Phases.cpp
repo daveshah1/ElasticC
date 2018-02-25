@@ -35,6 +35,11 @@ SynthContext MakeHDLDesign(Parser::HardwareBlock *top, EvaluatedBlock *block) {
   return MakeSynthContext(top, block);
 }
 
+void OptimiseHDLDesign(HDLGen::HDLDesign *hdld, SynthContext &sc) {
+  hdld->Prune();
+}
+
+
 void PipelineHDLDesign(HDLGen::HDLDesign *hdld, SynthContext &sc) {
   // TODO
 }
