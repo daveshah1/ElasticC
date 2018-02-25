@@ -3,3 +3,4 @@ src/version.cpp
 bin/elasticc
 *.exe
 *.ecc.vhd
+*.cf
