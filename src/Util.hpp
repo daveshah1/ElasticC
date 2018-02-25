@@ -54,4 +54,11 @@ extern const string ecc_version;
 // Return the number of bits needed to represent n values (used to determine
 // address bus size)
 int GetAddressBusSize(int length);
+
+
+#ifdef DEBUG
+#define DEBUG_BREAKPOINT() terminate()
+#else
+#define DEBUG_BREAKPOINT()
+#endif
 }

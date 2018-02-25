@@ -120,6 +120,9 @@ EvalObject *Evaluator::ProcessFunctionCall(
   };
   parserVariables = cse->savedParserVariables;
   tpContext = cse->oldTpContext;
+
+
+
   if (func->is_void) {
     return EvalNull;
   } else {
@@ -234,6 +237,8 @@ void SingleCycleEvaluator::EvaluateStatement(Parser::Statement *stmt) {
     Parser::Expression *expr;
     Parser::IfStatement *ifst;
     Parser::ForLoop *forl;
+    Parser::ReturnStatement *retst;
+
     if ((vardec = dynamic_cast<Parser::VariableDeclaration *>(stmt)) !=
         nullptr) {
       // Variable declaration
@@ -273,9 +278,14 @@ void SingleCycleEvaluator::EvaluateStatement(Parser::Statement *stmt) {
         }
 
       }
+    } else if ((retst = dynamic_cast<Parser::ReturnStatement *>(stmt))) {
+      // TODO: multiple `return` statements
+      EvalObject *retVal = EvaluateExpression(retst->returnValue);
+      SetVariableValue(callStack.top()->returnValue, retVal);
     } else if (stmt == Parser::NullStatement) {
       // do nothing
     } else {
+      DEBUG_BREAKPOINT();
       throw eval_error("unsupported construct reached by evaluator");
     }
   } catch (eval_error &e) {
@@ -337,12 +347,11 @@ EvalObject *SingleCycleEvaluator::EvaluateExpression(Parser::Expression *expr) {
   } else if ((funcc = dynamic_cast<Parser::FunctionCall *>(expr)) != nullptr) {
     vector<EvalObject *> evalOperands;
     transform(
-        bop->operands.begin(), bop->operands.end(), back_inserter(evalOperands),
+        funcc->operands.begin(), funcc->operands.end(), back_inserter(evalOperands),
         [this](Parser::Expression *exp) { return EvaluateExpression(exp); });
-    // TODO: function template parameters
     return ProcessFunctionCall(
         funcc->func, evalOperands,
-        vector<Parser::Templates::TemplateParameter *>{});
+        funcc->params);
   } else if ((il = dynamic_cast<Parser::InitialiserList *>(expr)) != nullptr) {
     throw eval_error("initialiser list not permitted here");
 

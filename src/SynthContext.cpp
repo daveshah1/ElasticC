@@ -31,7 +31,7 @@ static void UnpackInput(HDLSignal *inpsig, SynthContext &sc,
     for_each(chld.begin(), chld.end(),
              [&](EvaluatorVariable *ch) { UnpackInput(inpsig, sc, ch); });
     // Ignore during evaluation
-    sc.varSignals[ev] = nullptr;
+    sc.varSignals[ev] = inpsig;
     sc.drivenSignals.insert(ev);
   }
 }

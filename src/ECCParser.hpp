@@ -25,7 +25,7 @@ public:
   void ParseAll();
 
   // parse a data type specifier looking at declared structures
-  bool IsDataTypeKeyword(string keyword);
+  bool IsDataTypeKeyword(string keyword, vector<Templates::TemplateParameter *> templateParams);
   bool TryParseDataType(DataTypeSpecifier *&result);
   DataTypeSpecifier *ParseDataType(Context *ctx);
 

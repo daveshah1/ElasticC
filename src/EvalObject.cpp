@@ -841,56 +841,51 @@ EvalNull_class::EvalNull_class() : EvalObject(){};
 
 string EvalNull_class::GetID() { return "<null>"; };
 
-#ifdef DEBUG
-#define MAYBE_TERMINATE() terminate()
-#else
-#define MAYBE_TERMINATE()
-#endif
 
 DataType *EvalNull_class::GetDataType(Evaluator *state) {
-  MAYBE_TERMINATE();
+  DEBUG_BREAKPOINT();
   throw eval_error(nullMessage);
 }
 bool EvalNull_class::HasConstantValue(Evaluator *state) { return false; };
 EvalObject *EvalNull_class::GetConstantValue(Evaluator *state) {
-  MAYBE_TERMINATE();
+  DEBUG_BREAKPOINT();
   throw eval_error(nullMessage);
 }
 EvalObject *
 EvalNull_class::ApplyArraySubscriptRead(Evaluator *state,
                                         vector<EvalObject *> subscript) {
-  MAYBE_TERMINATE();
+  DEBUG_BREAKPOINT();
   throw eval_error(nullMessage);
 }
 void EvalNull_class::ApplyArraySubscriptWrite(Evaluator *state,
                                               vector<EvalObject *> subscript,
                                               EvalObject *value) {
-  MAYBE_TERMINATE();
+  DEBUG_BREAKPOINT();
   throw eval_error(nullMessage);
 }
 EvalObject *EvalNull_class::GetStructureMember(Evaluator *state, string name) {
-  MAYBE_TERMINATE();
+  DEBUG_BREAKPOINT();
   throw eval_error(nullMessage);
 }
 void EvalNull_class::AssignStructureMember(Evaluator *state, string name,
                                            EvalObject *value) {
-  MAYBE_TERMINATE();
+  DEBUG_BREAKPOINT();
   throw eval_error(nullMessage);
 }
 EvalObject *EvalNull_class::ApplyToState(Evaluator *state) {
-  MAYBE_TERMINATE();
+  DEBUG_BREAKPOINT();
   throw eval_error(nullMessage);
 }
 void EvalNull_class::AssignValue(Evaluator *state, EvalObject *value) {
-  MAYBE_TERMINATE();
+  DEBUG_BREAKPOINT();
   throw eval_error(nullMessage);
 }
 vector<EvalObject *> EvalNull_class::GetOperands() {
-  MAYBE_TERMINATE();
+  DEBUG_BREAKPOINT();
   throw eval_error(nullMessage);
 }
 EvalObject *EvalNull_class::GetValue(Evaluator *state) {
-  MAYBE_TERMINATE();
+  DEBUG_BREAKPOINT();
   throw eval_error(nullMessage);
 }
 

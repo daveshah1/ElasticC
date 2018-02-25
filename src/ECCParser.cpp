@@ -77,7 +77,8 @@ void ECCParser::ParseAll() {
         if (typeName.size() == 0)
           throw parse_error("invalid name");
         typedefs[typeName] = baseType;
-      } else if (IsDataTypeKeyword(code.PeekNextIdentOrLiteral())) {
+      } else if (IsDataTypeKeyword(code.PeekNextIdentOrLiteral(),
+                                   templateParams)) {
         ParseFunction(attr, templateParams);
         templateParams.clear();
       } else if (code.PeekNext() == ';') {
@@ -321,9 +322,11 @@ Statement *ECCParser::ParseStatement(Context *ctx) {
     }
     code.GetNext(); // consume ;
     result = new ReturnStatement(retval);
-  } else if (IsDataTypeKeyword(code.PeekNextIdentOrLiteral()) ||
+  } else if (IsDataTypeKeyword(code.PeekNextIdentOrLiteral(),
+                               ctx->GetDefinedTemplateParameters()) ||
              (code.PeekNextIdentOrLiteral() == "const") ||
-             (code.PeekNextIdentOrLiteral() == "static")) {
+             (code.PeekNextIdentOrLiteral() == "static") ||
+             (ctx->IsTemplateParameter(code.PeekNextIdentOrLiteral()))) {
     bool dummy_isRef;
 
     result = ParseVariableDeclaration(ctx, attr, dummy_isRef);
@@ -353,7 +356,8 @@ Block *ECCParser::ParseBlockContent(Context *ctx) {
   return block;
 }
 
-bool ECCParser::IsDataTypeKeyword(string keyword) {
+bool ECCParser::IsDataTypeKeyword(
+    string keyword, vector<Templates::TemplateParameter *> templateParams) {
   vector<string> basicDataTypes = {"auto",   "unsigned", "signed", "ram", "rom",
                                    "stream", "stream2d", "fifo",   "void"};
   if (find(basicDataTypes.begin(), basicDataTypes.end(), keyword) !=
@@ -365,10 +369,17 @@ bool ECCParser::IsDataTypeKeyword(string keyword) {
                      [&](UserStructure *s) { return s->name == keyword; }) !=
              gs.structures.end()) {
     return true;
+  } else if (find_if(templateParams.begin(), templateParams.end(),
+                     [&](Templates::TemplateParameter *t) {
+                       return (dynamic_cast<Templates::DataTypeParameter *>(
+                                   t) != nullptr) &&
+                              (t->name == keyword);
+                     }) != templateParams.end()) {
+    return true;
   } else {
     return false;
   }
-}
+} // namespace Parser
 
 DataTypeSpecifier *ECCParser::ParseDataType(Context *ctx) {
   code.Skip();
@@ -629,7 +640,7 @@ Expression *ECCParser::ParseExpression(vector<char> terminators, Context *ctx) {
       } else {
         opStack.pop(); // pop parenthesis from the operator stack
       }
-      if(!isDone) {
+      if (!isDone) {
         // definitely not the terminator so we can pull it from the parse stream
         // (if it is a terminator we need to keep it as other code might need to
         // see what the terminator was if more than one was specified)
@@ -731,16 +742,15 @@ Expression *ECCParser::ParseExpression(vector<char> terminators, Context *ctx) {
         }
         opStack.push(OperationStackItem(OpStackItemType::OPER, operType));
       } else {
-        if(code.PeekNext() == ';') {
+        if (code.PeekNext() == ';') {
           std::string tstr = "";
-          for(auto term : terminators)
+          for (auto term : terminators)
             tstr += string(" ") + term;
           throw parse_error(string("unexpected ===;===, expected") + tstr);
         } else {
           throw parse_error(string("unexpected character ") + code.PeekNext() +
                             string(" in expression"));
         }
-
       }
     }
 

@@ -1,0 +1,12 @@
+const int size = 3;
+
+template<typename T, typename R, int N> R dot_product(T a[N], T b[N]) {
+	R sum = 0;
+	for(int i = 0; i < N; i++)
+		sum += a[i] * b[i];
+	return sum;
+}
+
+block dot(clock<50000000>, reset, int8_t a[size], int8_t b[size]) => (int16_t q) {
+	q = dot_product<int8_t, int16_t, size>(a, b);
+};
