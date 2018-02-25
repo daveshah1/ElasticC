@@ -1,7 +1,7 @@
 src = $(wildcard src/*.cpp) $(wildcard src/hdl/*.cpp) $(wildcard src/timing/*.cpp) src/version.cpp
 obj = $(src:.cpp=.o)
 
-CXXFLAGS = -std=c++17 -g -O0 -Isrc/
+CXXFLAGS = -std=c++17 -g -O0 -Isrc/ -DDEBUG
 LDFLAGS =  -lboost_system -lboost_filesystem -lboost_filesystem -lboost_program_options
 all: bin/elasticc
 

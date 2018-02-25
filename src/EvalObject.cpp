@@ -60,7 +60,7 @@ vector<EvalObject *> EvalObject::GetOperands() {
   return vector<EvalObject *>{};
 };
 
-EvalObject *EvalObject::GetValue(Evaluator *state) { return EvalNull; }
+EvalObject *EvalObject::GetValue(Evaluator *state) { return this; }
 
 bool EvalObject::CanPushInto() { return false; }
 
@@ -429,10 +429,10 @@ EvalObject *EvalBasicOperation::ApplyToState(Evaluator *state) {
     EvalObject *value = apOperands[1]->GetValue(state);
     if (type == B_LS) {
       // push
-      apOperands[0]->ApplyPushInto(state, value);
+      operands.at(0)->ApplyPushInto(state, value);
     } else if (type == B_ASSIGN) {
       // simple assignment
-      apOperands[0]->AssignValue(state, value);
+      operands.at(0)->AssignValue(state, value);
     } else {
       throw eval_error("invalid operand");
     }
@@ -444,13 +444,13 @@ EvalObject *EvalBasicOperation::ApplyToState(Evaluator *state) {
       // for everything except postfix increment and decrement, the assigned
       // value is the same as the result value
       if (type == U_POSTINC) {
-        apOperands[0]->AssignValue(state,
+        operands.at(0)->AssignValue(state,
                                    GetResult(state, apOperands, U_PREINC));
       } else if (type == U_POSTDEC) {
-        apOperands[0]->AssignValue(state,
+        operands.at(0)->AssignValue(state,
                                    GetResult(state, apOperands, U_PREDEC));
       } else {
-        apOperands[0]->AssignValue(state, result);
+        operands.at(0)->AssignValue(state, result);
       }
     }
 
@@ -650,7 +650,8 @@ void EvalSpecialOperation::Synthesise(Evaluator *state, const SynthContext &sc,
   case SpecialOperationType::ARRAY_SEL:
     sc.design->AddDevice(new HDLGen::MultiplexerHDLDevice(
         vector<HDLGen::HDLSignal *>(operandSigs.begin(),
-                                    operandSigs.begin() + (operandSigs.size() - 1)),
+                                    operandSigs.begin() +
+                                        (operandSigs.size() - 1)),
         operandSigs.back(), outputNet));
     break;
   case SpecialOperationType::ARRAY_WRITE: {
@@ -839,40 +840,57 @@ void EvalDontCare::Synthesise(Evaluator *state, const SynthContext &sc,
 EvalNull_class::EvalNull_class() : EvalObject(){};
 
 string EvalNull_class::GetID() { return "<null>"; };
+
+#ifdef DEBUG
+#define MAYBE_TERMINATE() terminate()
+#else
+#define MAYBE_TERMINATE()
+#endif
+
 DataType *EvalNull_class::GetDataType(Evaluator *state) {
+  MAYBE_TERMINATE();
   throw eval_error(nullMessage);
 }
 bool EvalNull_class::HasConstantValue(Evaluator *state) { return false; };
 EvalObject *EvalNull_class::GetConstantValue(Evaluator *state) {
+  MAYBE_TERMINATE();
   throw eval_error(nullMessage);
 }
 EvalObject *
 EvalNull_class::ApplyArraySubscriptRead(Evaluator *state,
                                         vector<EvalObject *> subscript) {
+  MAYBE_TERMINATE();
   throw eval_error(nullMessage);
 }
 void EvalNull_class::ApplyArraySubscriptWrite(Evaluator *state,
                                               vector<EvalObject *> subscript,
                                               EvalObject *value) {
+  MAYBE_TERMINATE();
   throw eval_error(nullMessage);
 }
 EvalObject *EvalNull_class::GetStructureMember(Evaluator *state, string name) {
+  MAYBE_TERMINATE();
   throw eval_error(nullMessage);
 }
 void EvalNull_class::AssignStructureMember(Evaluator *state, string name,
                                            EvalObject *value) {
+  MAYBE_TERMINATE();
   throw eval_error(nullMessage);
 }
 EvalObject *EvalNull_class::ApplyToState(Evaluator *state) {
+  MAYBE_TERMINATE();
   throw eval_error(nullMessage);
 }
 void EvalNull_class::AssignValue(Evaluator *state, EvalObject *value) {
+  MAYBE_TERMINATE();
   throw eval_error(nullMessage);
 }
 vector<EvalObject *> EvalNull_class::GetOperands() {
+  MAYBE_TERMINATE();
   throw eval_error(nullMessage);
 }
 EvalObject *EvalNull_class::GetValue(Evaluator *state) {
+  MAYBE_TERMINATE();
   throw eval_error(nullMessage);
 }
 

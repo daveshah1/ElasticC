@@ -1,0 +1,12 @@
+const int N = 3;
+
+block mat(clock<50000000>, reset, int8_t a[N][N], int8_t b[N][N]) => (int16_t q[N][N]) {
+	for(int i = 0; i < N; i++) {
+		for(int j = 0; j < N; j++) {
+			int sum = 0;
+			for(int k = 0; k < N; k++)
+				sum += (a[i][k] * b[k][j]);
+			q[i][j] = sum;
+		}
+	}
+};
