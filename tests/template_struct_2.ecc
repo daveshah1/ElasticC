@@ -1,0 +1,27 @@
+template <int M> struct RGB {
+	unsigned<M> R;
+	unsigned<M> G;
+	unsigned<M> B;
+};
+
+template <int M> RGB<M> from_greyscale(unsigned<M> Y) {
+	RGB<M> x;
+	x.R = Y;
+	x.G = Y;
+	x.B = Y;
+	return x;
+}
+
+template <int M> unsigned<M> to_greyscale(RGB<M> rgb) {
+	// Fast implementation without divide
+	return (rgb.R >> 2) + (rgb.G >> 1) + (rgb.B >> 2);
+}
+
+const int bpp = 8;
+typedef RGB<bpp> pixel_t;
+typedef unsigned<bpp> comp_t;
+
+block grey_to_rgb(pixel_t input) => (pixel_t output) {
+	comp_t Y = to_greyscale<bpp>(input);
+	output = from_greyscale<bpp>(Y);
+};
