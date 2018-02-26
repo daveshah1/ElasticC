@@ -23,11 +23,12 @@ void BitConstantParameter::Parse(ECCParser *parser, Context *ctx) {
   expr = parser->ParseExpression(vector<char>{',', '>'}, ctx);
 }
 
-BitConstant BitConstantParameter::GetValue(Evaluator *eval) {
+BitConstant BitConstantParameter::GetValue(Evaluator *eval,
+                                           TemplateParamContext *tpctx) {
   if (!wasSpecified)
     throw runtime_error("template parameter ===" + name + "=== not specified");
   TemplateParamContext tempTpContext;
-  EvalObject *baseVal = eval->EvaluateExpression(expr);
+  EvalObject *baseVal = eval->EvaluateExpression(expr, tpctx);
   IntegerType *castType =
       dynamic_cast<IntegerType *>(type->Resolve(eval, &tempTpContext, baseVal));
   if (castType == nullptr)
@@ -41,8 +42,8 @@ TemplateParameter *BitConstantParameter::Clone() const {
   return new BitConstantParameter(name, type);
 }
 
-int IntParameter::GetValue(Evaluator *eval) {
-  return BitConstantParameter::GetValue(eval).intval();
+int IntParameter::GetValue(Evaluator *eval, TemplateParamContext *tpctx) {
+  return BitConstantParameter::GetValue(eval, tpctx).intval();
 };
 
 TemplateParameter *IntParameter::Clone() const {
@@ -136,6 +137,6 @@ CloneParameterSet(const vector<TemplateParameter *> &params) {
             [](const TemplateParameter *p) { return p->Clone(); });
   return cloned;
 };
-}
-}
-}
+} // namespace Templates
+} // namespace Parser
+} // namespace ElasticC

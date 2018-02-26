@@ -9,6 +9,7 @@
 using namespace std;
 namespace ElasticC {
 class Evaluator;
+class TemplateParamContext;
 namespace Parser {
 class DataTypeSpecifier;
 namespace Templates {
@@ -29,7 +30,7 @@ public:
   BitConstantParameter(string _name);
   BitConstantParameter(string _name, DataTypeSpecifier *_type);
   void Parse(ECCParser *parser, Context *ctx);
-  BitConstant GetValue(Evaluator *eval);
+  BitConstant GetValue(Evaluator *eval, TemplateParamContext *tpctx);
   virtual TemplateParameter *Clone() const;
 
 protected:
@@ -40,7 +41,7 @@ protected:
 class IntParameter : public BitConstantParameter {
 public:
   using BitConstantParameter::BitConstantParameter;
-  int GetValue(Evaluator *eval);
+  int GetValue(Evaluator *eval, TemplateParamContext *tpctx);
   TemplateParameter *Clone() const;
 };
 
@@ -92,6 +93,6 @@ private:
 
 vector<TemplateParameter *>
 CloneParameterSet(const vector<TemplateParameter *> &params);
-}
-}
-}
+} // namespace Templates
+} // namespace Parser
+} // namespace ElasticC

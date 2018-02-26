@@ -40,7 +40,7 @@ public:
   // state
   virtual void EvaluateBlock(Parser::HardwareBlock *block) = 0;
   virtual void EvaluateStatement(Parser::Statement *stmt) = 0;
-  virtual EvalObject *EvaluateExpression(Parser::Expression *expr) = 0;
+  virtual EvalObject *EvaluateExpression(Parser::Expression *expr, TemplateParamContext *tpctx = nullptr) = 0;
 
   virtual void SetVariableValue(EvaluatorVariable *var, EvalObject *value) = 0;
   virtual EvalObject *GetVariableValue(EvaluatorVariable *var) = 0;
@@ -114,7 +114,7 @@ public:
   virtual void SetVariableValue(EvaluatorVariable *var, EvalObject *value);
   virtual EvalObject *GetVariableValue(EvaluatorVariable *var);
   virtual void EvaluateStatement(Parser::Statement *stmt);
-  virtual EvalObject *EvaluateExpression(Parser::Expression *expr);
+  virtual EvalObject *EvaluateExpression(Parser::Expression *expr, TemplateParamContext *tpctx = nullptr);
   virtual EvaluatedBlock GetEvaluatedBlock();
 
   virtual ~SingleCycleEvaluator();

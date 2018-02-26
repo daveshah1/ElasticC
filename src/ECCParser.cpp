@@ -183,14 +183,19 @@ void ECCParser::ParseStructureDefinition(
   }
   code.Skip();
   while (!code.CheckMatchAndGet('}')) {
-    code.Skip();
-    bool dummy;
-    VariableDeclaration *vardecl =
-        ParseVariableDeclaration(strt, AttributeSet(), dummy);
-    strt->members.insert(strt->members.end(),
-                         vardecl->declaredVariables.begin(),
-                         vardecl->declaredVariables.end());
-    code.Skip();
+    if(code.CheckMatchAndGet(';')) {
+      code.Skip();
+    } else {
+      code.Skip();
+      bool dummy;
+      VariableDeclaration *vardecl =
+          ParseVariableDeclaration(strt, AttributeSet(), dummy);
+      strt->members.insert(strt->members.end(),
+                           vardecl->declaredVariables.begin(),
+                           vardecl->declaredVariables.end());
+      code.Skip();
+    }
+
   }
 
   gs.structures.push_back(strt);
@@ -852,7 +857,7 @@ void ECCParser::ParseHWBlock(const AttributeSet &currentAttr) {
     hwBlock->params.has_clock = true;
   SingleCycleEvaluator tempEval(&gs);
   if (clockFreq.wasSpecified)
-    hwBlock->params.clock_freq = clockFreq.GetValue(&tempEval);
+    hwBlock->params.clock_freq = clockFreq.GetValue(&tempEval, nullptr);
   if (specialInputsFound["clken"])
     hwBlock->params.has_cken = true;
   if (specialInputsFound["input_valid"])

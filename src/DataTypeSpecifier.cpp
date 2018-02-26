@@ -74,31 +74,33 @@ DataType *BasicDataTypeSpecifier::Resolve(Evaluator *currentEval,
   case BasicDataType::UNSIGNED:
     return new IntegerType(
         dynamic_cast<Templates::IntParameter *>(params[0])->GetValue(
-            currentEval),
+            currentEval, tpContext),
         false);
   case BasicDataType::SIGNED:
     return new IntegerType(
         dynamic_cast<Templates::IntParameter *>(params[0])->GetValue(
-            currentEval),
+            currentEval, tpContext),
         true);
   case BasicDataType::STREAM:
     return new StreamType(
         dynamic_cast<Templates::DataTypeParameter *>(params[0])
             ->GetValue()
             ->Resolve(currentEval, tpContext),
-        false, dynamic_cast<Templates::IntParameter *>(params[1])->GetValue(
-                   currentEval));
+        false,
+        dynamic_cast<Templates::IntParameter *>(params[1])->GetValue(
+            currentEval, tpContext));
   case BasicDataType::STREAM2D:
     return new StreamType(
         dynamic_cast<Templates::DataTypeParameter *>(params[0])
             ->GetValue()
             ->Resolve(currentEval, tpContext),
-        true, dynamic_cast<Templates::IntParameter *>(params[1])->GetValue(
-                  currentEval),
+        true,
+        dynamic_cast<Templates::IntParameter *>(params[1])->GetValue(
+            currentEval, tpContext),
         dynamic_cast<Templates::IntParameter *>(params[2])->GetValue(
-            currentEval),
+            currentEval, tpContext),
         dynamic_cast<Templates::IntParameter *>(params[3])->GetValue(
-            currentEval));
+            currentEval, tpContext));
   case BasicDataType::RAM:
   case BasicDataType::ROM:
     DataType *baseType = dynamic_cast<Templates::DataTypeParameter *>(params[0])
@@ -110,7 +112,7 @@ DataType *BasicDataTypeSpecifier::Resolve(Evaluator *currentEval,
     RAMType *ramType = new RAMType(
         *dynamic_cast<IntegerType *>(baseType),
         dynamic_cast<Templates::IntParameter *>(params[1])->GetValue(
-            currentEval));
+            currentEval, tpContext));
     ramType->is_rom = (type == BasicDataType::ROM);
     return ramType;
   }
@@ -189,5 +191,5 @@ DataType *DecltypeSpecifier::Resolve(Evaluator *currentEval,
                                      EvalObject *value) {
   return currentEval->EvaluateExpression(operand)->GetDataType(currentEval);
 }
-}
-}
+} // namespace Parser
+} // namespace ElasticC

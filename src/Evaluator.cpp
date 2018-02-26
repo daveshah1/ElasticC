@@ -144,13 +144,14 @@ BitConstant TemplateParamContext::GetNumericParameter(Evaluator *eval,
       throw eval_error("parameter ===" + templateParams.at(index)->name +
                        "=== is not numeric");
     } else {
-      return bcp->GetValue(eval);
+      return bcp->GetValue(eval, this);
     }
   } else {
     if (parent != nullptr) {
       return parent->GetNumericParameter(eval, origCtx, index);
     } else {
-      throw eval_error("unable to resolve template parameter");
+      DEBUG_BREAKPOINT();
+      throw eval_error("unable to resolve numeric template parameter");
     }
   }
 }
@@ -173,7 +174,7 @@ TemplateParamContext::GetTypeParameter(Evaluator *eval,
     if (parent != nullptr) {
       return parent->GetTypeParameter(eval, origCtx, index);
     } else {
-      throw eval_error("unable to resolve template parameter");
+      throw eval_error("unable to resolve typename template parameter");
     }
   }
 }
@@ -324,7 +325,9 @@ void SingleCycleEvaluator::EvaluateBlock(Parser::HardwareBlock *block) {
   EvaluateStatement(block->body);
 }
 
-EvalObject *SingleCycleEvaluator::EvaluateExpression(Parser::Expression *expr) {
+EvalObject *
+SingleCycleEvaluator::EvaluateExpression(Parser::Expression *expr,
+                                         TemplateParamContext *tpctx) {
   Parser::BasicOperation *bop;
   Parser::Literal *lit;
   Parser::VariableToken *vart;
@@ -337,9 +340,11 @@ EvalObject *SingleCycleEvaluator::EvaluateExpression(Parser::Expression *expr) {
 
   if ((bop = dynamic_cast<Parser::BasicOperation *>(expr)) != nullptr) {
     vector<EvalObject *> evalOperands;
-    transform(
-        bop->operands.begin(), bop->operands.end(), back_inserter(evalOperands),
-        [this](Parser::Expression *exp) { return EvaluateExpression(exp); });
+    transform(bop->operands.begin(), bop->operands.end(),
+              back_inserter(evalOperands),
+              [this, tpctx](Parser::Expression *exp) {
+                return EvaluateExpression(exp, tpctx);
+              });
     return (new EvalBasicOperation(bop->operType, evalOperands))
         ->ApplyToState(this)
         ->GetValue(this);
@@ -361,25 +366,29 @@ EvalObject *SingleCycleEvaluator::EvaluateExpression(Parser::Expression *expr) {
     }
   } else if ((arrs = dynamic_cast<Parser::ArraySubscript *>(expr)) != nullptr) {
     vector<EvalObject *> evalIndex;
-    transform(
-        arrs->index.begin(), arrs->index.end(), back_inserter(evalIndex),
-        [this](Parser::Expression *ei) { return EvaluateExpression(ei); });
-    return new EvalArrayAccess(EvaluateExpression(arrs->base), evalIndex);
+    transform(arrs->index.begin(), arrs->index.end(), back_inserter(evalIndex),
+              [this, tpctx](Parser::Expression *ei) {
+                return EvaluateExpression(ei, tpctx);
+              });
+    return new EvalArrayAccess(EvaluateExpression(arrs->base, tpctx),
+                               evalIndex);
   } else if ((mema = dynamic_cast<Parser::MemberAccess *>(expr)) != nullptr) {
-    return new EvalStructAccess(EvaluateExpression(mema->base),
+    return new EvalStructAccess(EvaluateExpression(mema->base, tpctx),
                                 mema->memberName);
   } else if ((funcc = dynamic_cast<Parser::FunctionCall *>(expr)) != nullptr) {
     vector<EvalObject *> evalOperands;
     transform(funcc->operands.begin(), funcc->operands.end(),
-              back_inserter(evalOperands), [this](Parser::Expression *exp) {
-                return EvaluateExpression(exp);
+              back_inserter(evalOperands),
+              [this, tpctx](Parser::Expression *exp) {
+                return EvaluateExpression(exp, tpctx);
               });
     return ProcessFunctionCall(funcc->func, evalOperands, funcc->params);
   } else if ((il = dynamic_cast<Parser::InitialiserList *>(expr)) != nullptr) {
     throw eval_error("initialiser list not permitted here");
 
   } else if ((bt = dynamic_cast<Parser::Builtin *>(expr)) != nullptr) {
-    DataType *operandType = EvaluateExpression(bt->operand)->GetDataType(this);
+    DataType *operandType =
+        EvaluateExpression(bt->operand, tpctx)->GetDataType(this);
     BitConstant value(0);
     if (bt->type == Parser::BuiltinType::SIZEOF) {
       value = BitConstant((operandType->GetWidth() + 7) / 8);
@@ -422,8 +431,12 @@ EvalObject *SingleCycleEvaluator::EvaluateExpression(Parser::Expression *expr) {
     return new EvalConstant(value);
   } else if ((tpt = dynamic_cast<Parser::TemplateParamToken *>(expr)) !=
              nullptr) {
-    return new EvalConstant(
-        tpContext->GetNumericParameter(this, tpt->pcontext, tpt->index));
+    if (tpctx == nullptr)
+      return new EvalConstant(
+          tpContext->GetNumericParameter(this, tpt->pcontext, tpt->index));
+    else
+      return new EvalConstant(
+          tpctx->GetNumericParameter(this, tpt->pcontext, tpt->index));
   } else if (expr == Parser::NullExpression) {
     return EvalNull;
   } else {

@@ -334,6 +334,7 @@ EvalObject *EvalStruct::GetStructureMember(Evaluator *state, string name) {
   try {
     return items.at(name);
   } catch (out_of_range) {
+    DEBUG_BREAKPOINT();
     throw eval_error("structure type ===" + structType->structName +
                      "=== does not contain member ===" + name + "===");
   }

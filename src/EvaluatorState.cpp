@@ -291,18 +291,20 @@ void StructureEvaluatorVariable::SetBitOffset(int _bitoffset) {
 
 EvalObject *StructureEvaluatorVariable::HandleRead(Evaluator *genst) {
   map<string, EvalObject *> structValues;
-  transform(structItems.begin(), structItems.end(),
+  transform(type->content.begin(), type->content.end(),
             inserter(structValues, structValues.end()),
-            [genst](EvaluatorVariable *itm) {
-              return make_pair(itm->name, itm->HandleRead(genst));
+            [this, genst](const DataStructureItem &itm) {
+              return make_pair(itm.name,
+                               GetChildByName(itm.name)->HandleRead(genst));
             });
   return new EvalStruct(type, structValues);
 }
 
 void StructureEvaluatorVariable::HandleWrite(Evaluator *genst,
                                              EvalObject *value) {
-  for (auto itm : structItems) {
-    itm->HandleWrite(genst, value->GetStructureMember(genst, itm->name));
+  for (auto itm : type->content) {
+    GetChildByName(itm.name)->HandleWrite(
+        genst, value->GetStructureMember(genst, itm.name));
   }
 }
 
