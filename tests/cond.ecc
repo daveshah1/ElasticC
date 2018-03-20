@@ -1,0 +1,7 @@
+block conditional(signed<8> x) => (unsigned<8> y) {
+    if(x >= 0) {
+        y = x;
+    } else {
+        y = -x;
+    }
+}

@@ -183,7 +183,7 @@ void ECCParser::ParseStructureDefinition(
   }
   code.Skip();
   while (!code.CheckMatchAndGet('}')) {
-    if(code.CheckMatchAndGet(';')) {
+    if (code.CheckMatchAndGet(';')) {
       code.Skip();
     } else {
       code.Skip();
@@ -195,7 +195,6 @@ void ECCParser::ParseStructureDefinition(
                            vardecl->declaredVariables.end());
       code.Skip();
     }
-
   }
 
   gs.structures.push_back(strt);
@@ -276,6 +275,7 @@ Statement *ECCParser::ParseStatement(Context *ctx) {
     code.Skip();
     Statement *clause_false = NullStatement;
     if (code.PeekNextIdentOrLiteral() == "else") {
+      code.GetNextIdentOrLiteral(); // consume 'else'
       clause_false = ParseStatement(ctx);
     }
     result = new IfStatement(cond, clause_true, clause_false, attr);
@@ -607,7 +607,7 @@ Expression *ECCParser::ParseExpression(vector<char> terminators, Context *ctx) {
   bool isDone = false;
   // To support certain operation types keep track of whether the last parsed
   // token was an operation
-  bool lastWasOperation = false;
+  bool lastWasOperation = true;
   code.Skip();
   while (!isDone) {
     bool nextIsLiteral = false;
