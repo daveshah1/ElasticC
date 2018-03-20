@@ -302,7 +302,6 @@ void EvalArray::Synthesise(Evaluator *state, const SynthContext &sc,
     offset += M;
   }
   sc.design->AddDevice(new HDLGen::CombinerHDLDevice(slices, outputNet));
-
 }
 
 /*EvalStruct*/
@@ -426,8 +425,12 @@ DataType *EvalBasicOperation::GetDataType(Evaluator *state) {
     bool result_signed = any_of(intTypes.begin(), intTypes.end(),
                                 [](IntegerType *t) { return t->is_signed; });
 
-    return new IntegerType(GetResultWidth(widths, type, cnstVals),
-                           result_signed);
+    // Special case for comparisons and logical operations
+    if (HasBooleanResult(type))
+      return new IntegerType(1, false);
+    else
+      return new IntegerType(GetResultWidth(widths, type, cnstVals),
+                             result_signed);
   }
 };
 

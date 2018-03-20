@@ -62,6 +62,10 @@ extern const vector<Operation> binaryOperations;
 // otherwise
 int GetResultWidth(vector<int> inWidths, OperationType oper,
                    vector<BitConstant *> constants);
+
+// Return whether or not an operation has boolean result
+bool HasBooleanResult(OperationType oper);
+
 // Returns a pointer to an operation given the OperationType enum value
 const Operation *LookupOperation(OperationType type);
-}
+} // namespace ElasticC

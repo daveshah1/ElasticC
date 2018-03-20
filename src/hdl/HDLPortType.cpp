@@ -93,17 +93,17 @@ string NumericPortType::VHDLCastFrom(const HDLPortType *other,
     // Go via a std_logic_vector first
     curr_value =
         LogicVectorPortType(other->GetWidth()).VHDLCastFrom(other, value);
+    curr_value = string(is_signed ? "signed(" : "unsigned(") + curr_value + ")";
   } else {
     if (other->IsSigned() == is_signed)
       same_signedness = true;
     curr_value = value;
   }
-  if (!same_signedness)
-    curr_value = string(is_signed ? "signed(" : "unsigned(") + curr_value + ")";
-
   if (other->GetWidth() != width) {
     curr_value = "resize(" + curr_value + ", " + to_string(width) + ")";
   }
+  if (!same_signedness)
+    curr_value = string(is_signed ? "signed(" : "unsigned(") + curr_value + ")";
   return curr_value;
 }
 

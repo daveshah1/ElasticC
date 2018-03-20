@@ -56,6 +56,23 @@ int GetResultWidth(vector<int> inWidths, OperationType oper,
   }
 }
 
+bool HasBooleanResult(OperationType oper) {
+  switch (oper) {
+  case B_LOR:
+  case B_LAND:
+  case B_EQ:
+  case B_NEQ:
+  case B_GT:
+  case B_GTE:
+  case B_LT:
+  case B_LTE:
+  case U_LNOT:
+    return true;
+  default:
+    return false;
+  }
+}
+
 const Operation *LookupOperation(OperationType type) {
   for (auto &o : unaryPostfixOperations) {
     if (o.type == type) {
@@ -79,8 +96,10 @@ const vector<Operation> unaryPostfixOperations = {
     {U_POSTINC, "++", 2, 1, false, true}, {U_POSTDEC, "--", 2, 1, false, true}};
 // NYI: prefix ++/--, unary -
 const vector<Operation> unaryPrefixOperations = {
-    {U_BWNOT, "~", 3, 1, true, false}, {U_LNOT, "!", 3, 1, true, false},
-    {U_PREINC, "++", 3, 1, true, true}, {U_PREDEC, "--", 3, 1, true, true},
+    {U_BWNOT, "~", 3, 1, true, false},
+    {U_LNOT, "!", 3, 1, true, false},
+    {U_PREINC, "++", 3, 1, true, true},
+    {U_PREDEC, "--", 3, 1, true, true},
     {U_MINUS, "-", 3, 1, true, false}};
 const vector<Operation> binaryOperations = {
     {B_MUL, "*", 5, 2, false, false},     {B_DIV, "/", 5, 2, false, false},
@@ -100,4 +119,4 @@ const vector<Operation> binaryOperations = {
     {B_OREQ, "|=", 15, 2, true, true}
 
 };
-}
+} // namespace ElasticC

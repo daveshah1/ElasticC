@@ -48,18 +48,16 @@ void OperationHDLDevice::GenerateVHDL(ostream &vhdl) {
     is_signed |= type->IsSigned();
   }
   // Add/sub extend width by 1 to guarantee no overflow
-  if ((oper == OperationType::B_ADD) || (oper == OperationType::B_SUB)) {
+  if ((oper == OperationType::B_ADD) || (oper == OperationType::B_SUB)
+      || (oper == OperationType::B_NEQ) || (oper == OperationType::B_EQ) || (oper == OperationType::B_GT)
+      || (oper == OperationType::B_GTE) || (oper == OperationType::B_LT) || (oper == OperationType::B_LTE)) {
     width += 1;
   }
-  // Multiplication and comparison keeps operand types to allow signed/unsigned
-  // and mixed
-  // width multiplies/compares, everything else casts to a common type
+  // Multiplication keeps operand types to allow signed/unsigned and mixed
+  // width multiplies, everything else casts to a common type
   for (int i = 0; i < ports.size() - 1; i++) {
     HDLPortType *type = ports.at(i)->type;
-    if ((oper == OperationType::B_MUL) || (oper == OperationType::B_EQ) ||
-        (oper == OperationType::B_NEQ) || (oper == OperationType::B_GT) ||
-        (oper == OperationType::B_LT) || (oper == OperationType::B_GTE) ||
-        (oper == OperationType::B_LTE)) {
+    if (oper == OperationType::B_MUL) {
       operands.at(i) = NumericPortType(type->GetWidth(), type->IsSigned())
                            .VHDLCastFrom(type, operands.at(i));
     } else {
@@ -67,9 +65,9 @@ void OperationHDLDevice::GenerateVHDL(ostream &vhdl) {
           NumericPortType(width, is_signed).VHDLCastFrom(type, operands.at(i));
     }
   }
-  // Logical operations use a vhdl when/esle construct so can't be wrapped in a
+  // Logical operations use a vhdl when/else construct so can't be wrapped in a
   // cast
-  bool is_logical = false;
+  bool is_logical = HasBooleanResult(oper);
 
   // One and zero cast to result type for use in logical operations
   NumericPortType logConstType(1, false);
@@ -385,7 +383,7 @@ void MultiplexerHDLDevice::GenerateVHDL(ostream &vhdl) {
     vhdl << ports.back()->type->VHDLCastFrom(ports.at(i)->type,
                                              ports.at(i)->connectedNet->name);
     vhdl << " when unsigned(" << ports.at(ports.size() - 2)->connectedNet->name
-         << ") == " << i << " else " << endl;
+         << ") = " << i << " else " << endl;
   }
   vhdl << "\t\t\t\t" << ports.back()->type->GetZero() << ";" << endl;
 }
