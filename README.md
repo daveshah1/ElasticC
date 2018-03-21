@@ -50,6 +50,18 @@ I am only able to work on ElasticC in my spare time. I would estimate that enoug
 features for it to be useful will be completed by the end of 2018, but it will
 be several years before all the planned features are completed.
 
+## Building ElasticC
+Currently ElasticC is only being tested on Linux, but there is no reason it shouldn't also work 
+on Windows or Mac OS X with a suitable build environment. 
+
+ElasticC requires a modern compiler with C++17 support (Clang is recommended but g++ is also
+supported), and the boost libraries. Once these are installed, you can simply run `make` to
+build ElasticC. 
+
+ElasticC includes some automated functional tests. These require a recent version of ghdl
+and Python 3.5 or newer. You will need to ensure that the `PYTHON`environment variable points to
+Python 3 if your distribution defaults to Python 2. Run `make test` to run the tests. 
+
 ## Contributions
 Contributions are always appreciated, send an email (see my GitHub profile),
 ping me (_daveshah_) on Freenode ##openfpga, or open an issue
