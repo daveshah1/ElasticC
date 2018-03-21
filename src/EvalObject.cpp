@@ -657,6 +657,9 @@ void EvalSpecialOperation::AssignValue(Evaluator *state, EvalObject *value) {
 }
 
 vector<EvalObject *> EvalSpecialOperation::GetOperands() { return operands; }
+vector<EvalObject *> &EvalSpecialOperation::GetOperandsByRef() {
+  return operands;
+}
 
 EvalObject *EvalSpecialOperation::GetValue(Evaluator *state) {
   return ApplyToState(state);

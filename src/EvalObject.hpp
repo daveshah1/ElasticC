@@ -283,6 +283,8 @@ public:
   EvalObject *ApplyToState(Evaluator *state);
   void AssignValue(Evaluator *state, EvalObject *value);
   vector<EvalObject *> GetOperands();
+  vector<EvalObject *> &GetOperandsByRef();
+
   EvalObject *GetValue(Evaluator *state);
 
   void Synthesise(Evaluator *state, const SynthContext &sc,

@@ -247,8 +247,8 @@ void SingleCycleEvaluator::SetVariableValue(EvaluatorVariable *var,
     } else {
       conditionalValue = new EvalSpecialOperation(
           SpecialOperationType::T_COND,
-          vector<EvalObject *>{conditions[i].first, conditionalValue,
-                               new EvalDontCare(var->GetType())});
+          vector<EvalObject *>{conditions[i].first, new EvalDontCare(var->GetType()),
+                               conditionalValue});
     }
   }
   toInsertCond.first = conditionalValue;
@@ -457,9 +457,9 @@ SingleCycleEvaluator::FindFirstNotMatchingConds(EvalObject *&value, int index) {
 
   // is a match, just follow the right branch
   if (conditions[index].second)
-    return FindFirstNotMatchingConds(eso->GetOperands()[1], index + 1);
+    return FindFirstNotMatchingConds(eso->GetOperandsByRef()[1], index + 1);
   else
-    return FindFirstNotMatchingConds(eso->GetOperands()[2], index + 2);
+    return FindFirstNotMatchingConds(eso->GetOperandsByRef()[2], index + 2);
 }
 
 EvalObject *SingleCycleEvaluator::GetVariableValue(EvaluatorVariable *var) {
