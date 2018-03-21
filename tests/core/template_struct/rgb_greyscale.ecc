@@ -21,7 +21,7 @@ const int bpp = 8;
 typedef RGB<bpp> pixel_t;
 typedef unsigned<bpp> comp_t;
 
-block grey_to_rgb(pixel_t input) => (pixel_t output) {
+block rgb_greyscale(pixel_t input) => (pixel_t output) {
 	comp_t Y = to_greyscale<bpp>(input);
 	output = from_greyscale<bpp>(Y);
 };

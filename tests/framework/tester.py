@@ -47,7 +47,7 @@ def run_test(input_file, uut_name, inputs, outputs, is_clocked, input_vectors, o
         subprocess.run(["ghdl", "-a", "uut.vhd"],
                        cwd=tempdir, check=True)
     except subprocess.CalledProcessError:
-        print("Test failure: GHDL analysis exited with non-zero return code")
+        print("Test failure: ElasticC exited with non-zero return code")
         return 1
 
     try:
@@ -65,7 +65,7 @@ def run_test(input_file, uut_name, inputs, outputs, is_clocked, input_vectors, o
         return 1
     try:
         # Run
-        subprocess.run(["ghdl", "-r", "--ieee=synopsys", "ecc_default_tb"], cwd=tempdir, check=True)
+        subprocess.run(["ghdl", "-r", "--ieee=synopsys", "ecc_default_tb", "--ieee-asserts=disable-at-0"], cwd=tempdir, check=True)
     except subprocess.CalledProcessError:
         print("Test failure: GHDL run exited with non-zero return code")
         return 1
