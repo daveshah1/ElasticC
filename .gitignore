@@ -4,3 +4,5 @@ bin/elasticc
 *.exe
 *.ecc.vhd
 *.cf
+__pycache__
+temp_run
