@@ -11,6 +11,9 @@ bin/elasticc: $(obj)
 src/version.cpp:
 	src/update_version.sh
 
-.PHONY: clean src/version.cpp
+test: bin/elasticc
+	$(MAKE) -C tests/ test
+
+.PHONY: clean src/version.cpp test
 clean:
 	rm -f $(obj) bin/elasticc

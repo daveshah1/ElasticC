@@ -3,14 +3,20 @@ import os, sys, subprocess
 
 import make_tb
 
+dirname = os.path.dirname(__file__)
+eccexe = os.path.join(dirname, '../../bin/elasticc')
+
+
 def run_test(input_file, uut_name, inputs, outputs, is_clocked, input_vectors, output_results):
     """
+    Build input_file using ElasticC into VHDL
     Build a testbench in VHDL and run it using ghdl.
     Inputs and outputs are list of (name, width) tuples.
     input_vectors and output_results are both an array of integers
     An entry in output_results can also be None for a don't care
     Return 0 on success or 1 on failure
     """
+    print(" -- Testing module {} --".format(uut_name))
     input_dir = os.path.dirname(input_file)
     input_bn = os.path.basename(input_file)
     tempdir = os.path.join(input_dir, "temp_run")
@@ -19,6 +25,15 @@ def run_test(input_file, uut_name, inputs, outputs, is_clocked, input_vectors, o
     except OSError:
         pass
     
+    uutpath = os.path.join(tempdir, "uut.vhd")
+    try:
+        # Run ElasticC
+        subprocess.run([eccexe, "-o", "uut.vhd", os.path.join("..", input_file)],
+                       cwd=tempdir, check=True)
+    except subprocess.CalledProcessError:
+        print("Test failure: GHDL analysis exited with non-zero return code")
+        return 1
+
     tbpath = os.path.join(tempdir, "testbench.vhd")
     make_tb.generate_vhdl(uut_name, inputs, outputs, is_clocked, tbpath)
 
@@ -29,7 +44,7 @@ def run_test(input_file, uut_name, inputs, outputs, is_clocked, input_vectors, o
             f.write(text_vectors + '\n')
     try:
         # Analyse UUT
-        subprocess.run(["ghdl", "-a", os.path.join("..", input_file)],
+        subprocess.run(["ghdl", "-a", "uut.vhd"],
                        cwd=tempdir, check=True)
     except subprocess.CalledProcessError:
         print("Test failure: GHDL analysis exited with non-zero return code")
@@ -74,4 +89,5 @@ def run_test(input_file, uut_name, inputs, outputs, is_clocked, input_vectors, o
                     print("Test failure for result set {}. Expected {} for output {}, but got {}.".format(current_idx, expt, outputs[i], res))
                     return 1
             current_idx+=1
+    print(" -- All tests for module {} passed --".format(uut_name))
     return 0
