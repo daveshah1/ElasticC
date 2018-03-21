@@ -1,0 +1,28 @@
+dist: trusty
+sudo: required
+language: cpp
+compiler: g++
+matrix:
+  include:
+    - os: linux
+      addons:
+        apt:
+            sources:
+                - ubuntu-toolchain-r-test
+                - deadsnakes
+            packages:
+                - g++-7
+                - libboost-all-dev
+                - python3.5
+                - wget
+                - libgnat-4.6
+                - zlib1g-dev
+  env:
+    - MATRIX_EVAL="CC=gcc-7 && CXX=g++-7"
+
+before_install:
+    - eval "${MATRIX_EVAL}"
+    - wget https://github.com/ghdl/ghdl/releases/download/v0.35/ghdl-0.35-mcode-ubuntu14.tgz
+    - sudo tar -xvf ghdl-0.35-mcode-ubuntu14.tgz -C /usr/
+script:
+    - CC=gcc-7 CXX=g++-7 PYTHON=python3.5 make test
