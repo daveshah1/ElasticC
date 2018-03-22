@@ -1,5 +1,7 @@
 # ElasticC - lightweight open HLS for rapid prototyping of simple FPGA projects
 
+[![Build Status](https://travis-ci.org/daveshah1/ElasticC.svg?branch=master)](https://travis-ci.org/daveshah1/ElasticC)
+
 **ElasticC is currently in early development. It is NOT finished or working for
 any useful purpose. At the moment it is little more than a parser, simple 
 evaluator and VHDL generator. It contains no timing or latency handling code
